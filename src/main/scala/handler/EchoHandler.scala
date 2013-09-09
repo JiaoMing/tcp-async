@@ -6,13 +6,15 @@ import java.net.InetSocketAddress
 
 object EchoHandler {
   def props(connection: ActorRef, remote: InetSocketAddress = null): Props =
-    Props(classOf[EchoHandler],connection)
+    Props(classOf[EchoHandler], connection)
 }
 
 class EchoHandler(connection: ActorRef) extends Handler {
 
   import Tcp._
+
   context.watch(connection)
+
   /**
    * Echoes incoming message.
    * @return
