@@ -16,6 +16,8 @@ object Conf {
   val dbPoolMaxIdle = config.getInt("db.pool.maxIdle")
   val dbPoolMaxQueueSize = config.getInt("db.pool.maxQueueSize")
 
+  val apiUrl = config.getString("api.url")
+
   val appHostName = config.getString("app.hostname")
   val appPort = config.getInt("app.port")
 
