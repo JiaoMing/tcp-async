@@ -1,18 +1,114 @@
 <html>
 <head>
-    <title>Main Scala - Activator Template</title>
+    <title>Hello Scala - Activator Template</title>
 </head>
 <body>
 <div>
-    <h2>Hellooooo</h2>
+    <h2> Introduction </h2>
+    <p>
+        Tcp handler, as you can understand from the name, handles tcp requests asynchronously with 
+        <a href="http://www.akka.io">AkkaIO</a>.
+    </p>
+    <p> 
+        Thanks to akka-io, <code>tcp-handler</code> can respond high amount of requests simultaneously. Whole app have an asynchronous design.
+    </p>
 
-    <p>This is sparta</p>
+    <p>
+        We've created a few options for handling requests. Writing incoming data to a mysql database, making an Api call,
+        and an echoserver from the simplest. 
+        For those handlers we've used some open source libraries which will be mentioned later.
+    </p>
 
+    <img src="tutorial/tcp-async.png" style="width:400px">
 
-    <p>This block of code uses the <code>println</code> method to display the string
-       literal "Main, world!" on the console.  We can see this output by
-       clicking on the <a class="shortcut" href="#run">Run</a> tab.
+    <p>
+        For further information about used technologies, please refer to References section.
     </p>
 </div>
+
+<div>
+    <h2> First things first: Main </h2>
+
+    <p>
+        The enterance of our application contain 2 lines of code.
+        First, an <a href="http://doc.akka.io/docs/akka/2.0/general/actor-systems.html">Actor System</a> definition:
+            <pre><code>
+                val system = ActorSystem("server")
+            </code></pre>
+    </p>
+
+    <p>
+        And a Server actor definition which is our next subject:
+        <pre><code>
+            val service = system.actorOf(TcpServer.props(), "ServerActor")
+        </code></pre>
+    </p>
+
+</div>
+
+<div>
+    <h2> Handling Requests: Server</h2>
+    <p> 
+        <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
+        is an actor which listen requests and decide what to do with incoming request.
+        This could be a Htpp, Tcp or Udp request. You should implement a Server actor for the type you wish to use. 
+        <code>tcp-async</code> have a
+        <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a> 
+        as default. 
+    </p>
+
+    <p>
+        Every 
+        <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
+        actor binds to an InetSocketAdress. In this case,
+        <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a>
+        listens incoming Tcp requests with following binding:
+        <pre><code>
+            IO(Tcp) ! Bind(self, new InetSocketAddress(Conf.appHostName, Conf.appPort))
+        </code></pre>
+    </p>
+    
+
+    <p>
+        HostName and port comes from 
+        <a href="#code/src/main/resources/application.conf" class="shortcut">configuration</a>
+        file which we will see later.
+    </p>
+
+    <p>
+        Just below that, you can see <code>recieve()</code> method:
+    </p>
+
+    <pre><code>
+        override def receive = {
+            case CommandFailed(_: Bind) => context stop self
+
+            case Connected(remote, local) =>
+              val handler = context.actorOf(ApiHandler.props(sender))
+              sender ! Register(handler)
+        }
+    </code></pre>
+
+    <p>
+        <code>recieve()</code> creates a new
+        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> 
+        and registers it to sender. Which means server creates a connection with sender.
+        But the key part here is that connection with sender(client) is not made by server itself.
+        Every connection is handled by a Handler actor.
+        That means Server actor doesn't need to deal with all connections. 
+        Thus there is no impediment about connection count. According to some tests that we've made, 
+        10k requests can be easily handled by tcp-async.
+    </p>
+
+    <p>
+        Remember, 10k actors doesn't mean 10k threads.
+    </p> 
+
+    <p>
+        Handlers are will be described next.
+    </p> 
+
+</div>
+
 </body>
 </html>

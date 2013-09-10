@@ -21,7 +21,7 @@ class TcpServer extends Server {
   override def receive = {
     case CommandFailed(_: Bind) => context stop self
 
-    case Tcp.Connected(remote, local) =>
+    case Connected(remote, local) =>
       val handler = context.actorOf(ApiHandler.props(sender))
       sender ! Register(handler)
   }

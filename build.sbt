@@ -1,4 +1,4 @@
-name := "hello-scala"
+name := "tcp-async"
 
 version := "1.0"
 
