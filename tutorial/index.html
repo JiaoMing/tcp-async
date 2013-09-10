@@ -3,10 +3,11 @@
     <title>Hello Scala - Activator Template</title>
 </head>
 <body>
+
 <div>
     <h2> Introduction </h2>
     <p>
-        Tcp handler, as you can understand from the name, handles tcp requests asynchronously with 
+        tcp-async, as you can understand from the name, handles tcp requests asynchronously with 
         <a href="http://www.akka.io">AkkaIO</a>.
     </p>
     <p> 
@@ -23,14 +24,13 @@
 
     <p>
         For further information about used technologies, please refer to References section.
-    </p>
 </div>
 
 <div>
     <h2> First things first: Main </h2>
 
     <p>
-        The enterance of our application contain 2 lines of code.
+        The enterance of our application contain two lines of code.
         First, an <a href="http://doc.akka.io/docs/akka/2.0/general/actor-systems.html">Actor System</a> definition:
             <pre><code>
                 val system = ActorSystem("server")
@@ -107,7 +107,75 @@
     <p>
         Handlers are will be described next.
     </p> 
+</div>
 
+<div>
+    <h2>Deciding what to do: Handlers</h2>
+
+    <p>
+        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> is trait and it extended Actor class. In other words Handler is a Actor.
+        Your handler classes should implemented by extending the 
+        Handler class and implementing the receive method. The receive method should define a series of case statements that defines which messages your handler can handle, using standard Scala pattern matching, along with the implementation of how the messages should be processed.
+    </p>
+
+    <h3> Props </h3>
+    <p>
+        Props is a configuration class to specify options for the creation of actors. Here is an example how to create Props.
+        <pre><code>
+            import akka.actor.Props
+        
+            val props1 = Props[MyActor]
+            val props2 = Props(classOf[MyActor], args)
+        </code></pre>
+    </p>
+
+    <h3> Create an Handler </h3>
+    <pre><code>
+        object DemoActor {
+          def props(connection: ActorRef): Props = 
+            Props(classOf[DemoActor], connection)
+        }
+         
+        class DemoHandler(connection: ActorRef) extends Handler {
+          override def receive = {
+            case x ⇒ // some behavior
+          }
+        }
+    </code></pre>
+    <p>
+        This is recommended usage for creating an Actor so an handler class creating in this way.
+    </p>
+</div>
+
+<div>
+    <h2> Received Data </h2>
+    <p> 
+        This classes are an handler and extended <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> trait. 
+        Every handler class must extended Handler and implementing received method. This method handle massages.
+        Tcp messages received with <code> case Received(data) => // Process </code>. Incoming data is ByteString and contain end of the message new line character. If you convert it to string you should this method. <code>data.utf8String.trim</code> 
+    </p>
+
+    <pre><code>
+        def receive = {
+            case Received(data) => {
+              val text = data.utf8String.trim
+              val sendText = text + " ok!"
+              text match {
+                case "close" => context.stop(self)
+                case _ => connection ! Write(ByteString(sendText))
+              }
+            }
+
+            case _: ConnectionClosed =>
+              context.stop(self)
+
+            case PeerClosed => context stop self
+        }   
+    </code></pre>
+
+    <p>
+        In this case <code> Received(data) </code> handle TCP messages and incoming messages type is String. Handled tcp data convert to String and implement pattern matching. If data equals "close", stop context else send data to client. <code>connection ! Write(ByteString(sendText))</code>.
+    </p>
 </div>
 
 </body>
