@@ -3,16 +3,77 @@
     <title>Main Scala - Activator Template</title>
 </head>
 <body>
+
 <div>
-    <h2>Hellooooo</h2>
+    <h2>Handlers</h2>
 
-    <p>This is sparta</p>
+    <p>
+    	<a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> is trait and it extended Actor class. In other words Handler is a Actor.
+    	Your handler classes should implemented by extending the 
+    	Handler class and implementing the receive method. The receive method should define a series of case statements that defines which messages your handler can handle, using standard Scala pattern matching, along with the implementation of how the messages should be processed.
+    </p>
 
+    <h3> Props </h3>
+    <p>
+	    Props is a configuration class to specify options for the creation of actors. Here is an example how to create Props.
+    	<pre><code>
+			import akka.actor.Props
+		
+			val props1 = Props[MyActor]
+			val props2 = Props(classOf[MyActor], args)
+		</code></pre>
+	</p>
 
-    <p>This block of code uses the <code>println</code> method to display the string
-       literal "Main, world!" on the console.  We can see this output by
-       clicking on the <a class="shortcut" href="#run">Run</a> tab.
+	<h3> Create an Handler </h3>
+		<pre><code>
+			object DemoActor {
+			  def props(connection: ActorRef): Props = 
+			  	Props(classOf[DemoActor], connection)
+			}
+			 
+			class DemoHandler(connection: ActorRef) extends Handler {
+			  override def receive = {
+			    case x ⇒ // some behavior
+			  }
+			}
+		</code></pre>
+		<p>
+			This is recommended usage for creating an Actor so an handler class creating in this way.
+		</p>
     </p>
 </div>
+
+<div>
+<h2> TCP Connection Handler </h2>
+	<p> 
+		This classes are an handler and extended <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> trait. 
+		Every handler class must extended Handler and implementing received method. This method handle massages.
+		Tcp messages received with <code> case Tcp.Received(data) => // Process </code>. Incoming data is ByteString and contain end of the message new line character. If you convert it to string you should this method. <code>data.utf8String.trim</code> 
+	</p>
+
+	<pre><code>
+		def receive = {
+		    case Tcp.Received(data) => {
+		      val text = data.utf8String.trim
+		      val sendText = text + " ok!"
+		      text match {
+		        case "close" => context.stop(self)
+		        case _ => connection ! Write(ByteString(sendText))
+		      }
+		    }
+
+		    case _: Tcp.ConnectionClosed =>
+		      context.stop(self)
+
+		    case PeerClosed => context stop self
+	 	}	
+	</code></pre>
+
+	<p>
+		In this case <code> Tcp.Received(data) </code> handle TCP messages and incoming messages type is String. Handled tcp data convert to String and implement pattern matching. If data equals "close", stop context else send data to client. <code>connection ! Write(ByteString(sendText))</code>.
+	</p>
+
+</div>
+
 </body>
 </html>
