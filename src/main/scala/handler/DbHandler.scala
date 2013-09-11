@@ -24,7 +24,7 @@ class DbHandler(connection: ActorRef) extends Handler {
    * @return
    */
   def receive = {
-    case Tcp.Received(data) => {
+    case Received(data) => {
       DB.execute("insert into demo values (?)", Array(data.utf8String.trim() + "--" + new Date()))
       connection ! Write(ByteString("values in db are: \n"))
       DB.rawQuery("select * from demo") map (result => {
@@ -33,7 +33,7 @@ class DbHandler(connection: ActorRef) extends Handler {
         })
       })
     }
-    case _: Tcp.ConnectionClosed =>
+    case _: ConnectionClosed =>
       context.stop(self)
     case PeerClosed => context stop self
   }

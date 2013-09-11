@@ -20,7 +20,7 @@ class EchoHandler(connection: ActorRef) extends Handler {
    * @return
    */
   def receive = {
-    case Tcp.Received(data) => {
+    case Received(data) => {
       val text = data.utf8String.trim
       text match {
         case "close" => context.stop(self)
@@ -28,8 +28,6 @@ class EchoHandler(connection: ActorRef) extends Handler {
       }
     }
 
-    case _: Tcp.ConnectionClosed =>
-      context.stop(self)
     case PeerClosed => context stop self
   }
 }

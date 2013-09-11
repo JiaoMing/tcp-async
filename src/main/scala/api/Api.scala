@@ -21,7 +21,7 @@ object Api {
   import system.dispatcher
 
   /**
-   * Make HTTP request
+   * Makes HTTP request
    * @param uri
    * @param data
    * @param method

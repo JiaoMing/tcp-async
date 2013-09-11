@@ -23,13 +23,13 @@ class ApiHandler(connection: ActorRef) extends Handler {
    * @return
    */
   def receive = {
-    case Tcp.Received(data) => {
+    case Received(data) => {
       val uri = Conf.apiUrl + data.utf8String.trim()
       Api.httpRequest(method = GET, uri = uri) map { response =>
         respond(response.entity.asString)
       }
     }
-    case _: Tcp.ConnectionClosed =>
+    case _: ConnectionClosed =>
       context.stop(self)
     case PeerClosed => context stop self
   }

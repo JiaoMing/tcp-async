@@ -16,7 +16,7 @@
 
     <p>
         We've created a few options for handling requests. Writing incoming data to a mysql database, making an Api call,
-        and an echoserver from the simplest. 
+        and an echoserver for the simplest. 
         For those handlers we've used some open source libraries which will be mentioned later.
     </p>
 
@@ -27,7 +27,72 @@
 </div>
 
 <div>
-    <h2> First things first: Main </h2>
+    <h2>Before Diving In</h2>
+
+    <p>
+        You should know some basic structures before scrolling around the template:
+    </p>
+
+    <h3>Config</h3>
+    
+    <p> Every configuration data stands in 
+        <a href="#code/src/main/resources/application.conf" class="shortcut">application.conf</a>.
+        This helps us to keep all configurations together.
+    </p>
+
+    <p> 
+        At the starting of the application, all configurations is loaded to a
+        <a href="#code/src/main/scala/util/Conf.scala" class="shortcut">Conf</a> object. 
+        Application uses this object when needed instead of reading <code>.conf</code> file every time.
+
+        <pre><code>
+            val uri = Conf.apiUrl + data.utf8String.trim()
+            // Instead of:
+            // val config = ConfigFactory.load()
+            // config.checkValid(ConfigFactory.defaultReference())
+            // val uri = config.getString("api.url") + data.utf8String.trim()
+        </code></pre>
+
+        For more information, please see 
+        <a href="https://github.com/typesafehub/config">typesafe config</a>. 
+        
+    </p>
+
+    <h3>Props</h3>
+    
+    <p>
+        Props is a configuration class to specify options for the creation of actors. 
+        Here is some examples for how to create Props:
+        <pre><code>
+            import akka.actor.Props
+        
+            val props1 = Props[MyActor]
+            val props2 = Props(classOf[MyActor], args)
+        </code></pre>
+    </p>
+
+    <p>
+        Recommended usage for creating an Actor is:
+    </p>
+    <pre><code>
+        object DemoActor {
+          def props(args): Props = 
+            Props(classOf[DemoActor], args)
+        }
+
+        class DemoActor(args) extends Actor {
+          override def receive = {
+            case x ⇒ // some behavior
+          }
+        }
+
+        context.actorOf(DemoActor.props(args))
+    </code></pre>
+
+</div>
+
+<div>
+    <h2> First Things First: Main </h2>
 
     <p>
         The enterance of our application contain two lines of code.
@@ -47,14 +112,14 @@
 </div>
 
 <div>
-    <h2> Handling Requests: Server</h2>
+    <h2> Handling Connections: Server</h2>
     <p> 
         <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
-        is an actor which listen requests and decide what to do with incoming request.
+        is an actor which listen connections .
         This could be a Htpp, Tcp or Udp request. You should implement a Server actor for the type you wish to use. 
         <code>tcp-async</code> have a
         <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a> 
-        as default. 
+        within. 
     </p>
 
     <p>
@@ -66,13 +131,6 @@
         <pre><code>
             IO(Tcp) ! Bind(self, new InetSocketAddress(Conf.appHostName, Conf.appPort))
         </code></pre>
-    </p>
-    
-
-    <p>
-        HostName and port comes from 
-        <a href="#code/src/main/resources/application.conf" class="shortcut">configuration</a>
-        file which we will see later.
     </p>
 
     <p>
@@ -93,58 +151,68 @@
         <code>recieve()</code> creates a new
         <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> 
         and registers it to sender. Which means server creates a connection with sender.
-        But the key part here is that connection with sender(client) is not made by server itself.
-        Every connection is handled by a Handler actor.
-        That means Server actor doesn't need to deal with all connections. 
+        But the key part here is that connection with sender(client) is not managed by server itself.
+        Every connection is handled by a Handler actor instance.
+        That means Server actor doesn't need to deal with them. 
         Thus there is no impediment about connection count. According to some tests that we've made, 
         10k requests can be easily handled by tcp-async.
     </p>
 
-    <p>
+    <p><i>
         Remember, 10k actors doesn't mean 10k threads.
-    </p> 
+    </i></p> 
 
     <p>
-        Handlers are will be described next.
+        Handlers will be described next.
     </p> 
 </div>
 
 <div>
-    <h2>Deciding what to do: Handlers</h2>
+    <h2>Deciding What To Do: Handler</h2>
 
     <p>
-        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> is trait and it extended Actor class. In other words Handler is a Actor.
-        Your handler classes should implemented by extending the 
-        Handler class and implementing the receive method. The receive method should define a series of case statements that defines which messages your handler can handle, using standard Scala pattern matching, along with the implementation of how the messages should be processed.
+        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> is an Actor that decide what to do with incoming request. The receive method should define a series of case statements that
+        decides which messages your handler can handle, using standard Scala pattern matching, along with the implementation
+        of how the messages should be processed.
     </p>
 
-    <h3> Props </h3>
     <p>
-        Props is a configuration class to specify options for the creation of actors. Here is an example how to create Props.
+        Handling requests managed in <code>receive</code> method.
+
         <pre><code>
-            import akka.actor.Props
-        
-            val props1 = Props[MyActor]
-            val props2 = Props(classOf[MyActor], args)
+            def receive = {
+                case Received(data) => {
+                    // Do something
+                }
+                
+                case PeerClosed => context stop self
+            }
         </code></pre>
+
+        <code> Received </code> case defines what to do with successfully recieved data.
+
+        Incoming data is ByteString and contains a new line character at the end. Thats why we convert and trim it before use:
+         <pre><code>
+            val convertedData = data.utf8String.trim
+         </code></pre>
     </p>
 
-    <h3> Create an Handler </h3>
-    <pre><code>
-        object DemoActor {
-          def props(connection: ActorRef): Props = 
-            Props(classOf[DemoActor], connection)
-        }
-         
-        class DemoHandler(connection: ActorRef) extends Handler {
-          override def receive = {
-            case x ⇒ // some behavior
-          }
-        }
-    </code></pre>
-    <p>
-        This is recommended usage for creating an Actor so an handler class creating in this way.
-    </p>
+    <p> tcp-async contains three type of handlers: </p>
+        <a href="#code/src/main/scala/handler/EchoHandler.scala" class="shortcut">EchoHandler</a>
+        
+        <p>
+
+        </p>
+        
+        <br />
+        <a href="#code/src/main/scala/handler/DbHandler.scala" class="shortcut">DbHandler</a>
+        <br />
+        <a href="#code/src/main/scala/handler/ApiHandler.scala" class="shortcut">ApiHandler</a>
+
+
+    
+
+    
 </div>
 
 <div>
