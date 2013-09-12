@@ -24,6 +24,7 @@
 
     <p>
         For further information about used technologies, please refer to References section.
+    </p>
 </div>
 
 <div>
@@ -176,6 +177,11 @@
     </i></p> 
 
     <p>
+        You must define which Handler you wish to use. 
+        <pre><code>
+            //EchoHandler, DbHandler, ApiHandler
+            val handler = context.actorOf(EchoHandler.props(sender))
+        </code></pre>
         Handlers will be described next.
     </p> 
 </div>
@@ -331,6 +337,67 @@
     </p>
 </div>
 
+<div>
+    <h2>Ground Control To Major Tom: ApiHandler</h2>
+    <p>
+        <a href="#code/src/main/scala/handler/ApiHandler.scala" class="shortcut">ApiHandler</a> 
+        makes Http requests asynchronously. Response returns <code>Future[HttpResponse]</code>. 
+        Response data is in entity object.
+    </p>
+
+    <p>
+        A Http request made as follows:
+        <pre><code> 
+            Api.httpRequest(method = GET, uri = "ApiUrl") map { response =>
+                // Get response
+            } 
+        </code> </pre>
+    </p>
+
+    <p>
+        <code>ApiHandler</code> makes Api calls to 
+        <a href="https://developers.google.com/maps/documentation/elevation/">Google Elevation Api</a>.
+        Google elevation api simply returns you the elevation of coordinates that you give. To try:
+
+        <pre><code>
+            // Tcp connection:
+            telnet localhost 9999
+
+            // request
+            //41.020254,28.889898
+
+            // response
+            // {
+            //    "results" : [
+            //       {
+            //          "elevation" : 74.11408233642578,
+            //          "location" : {
+            //             "lat" : 41.020254,
+            //             "lng" : 28.889898
+            //          },
+            //          "resolution" : 610.8129272460938
+            //       }
+            //    ],
+            //    "status" : "OK"
+            // }
+        </code></pre>
+    </p>
+
+    <p>
+        Don't forget to create ByteString conversations.
+    </p>
+
+    <p>
+        We used 
+        <a href="http://spray.io/documentation/1.2-M8/spray-client/">spray-client</a> 
+        to make Api calls asynchronously. <code>spray-client</code> api call definition is in
+        <a href="#code/src/main/scala/api/Api.scala" class="shortcut">Api.scala</a>
+    </p>
+
+    <p>
+        <code>httpRequest</code> 
+    </p>
+</div>
 
 </body>
 </html>

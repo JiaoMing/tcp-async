@@ -29,8 +29,6 @@ class ApiHandler(connection: ActorRef) extends Handler {
         respond(response.entity.asString)
       }
     }
-    case _: ConnectionClosed =>
-      context.stop(self)
     case PeerClosed => context stop self
   }
 

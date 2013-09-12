@@ -33,8 +33,6 @@ class DbHandler(connection: ActorRef) extends Handler {
         })
       })
     }
-    case _: ConnectionClosed =>
-      context.stop(self)
     case PeerClosed => context stop self
   }
 

@@ -22,7 +22,7 @@ class TcpServer extends Server {
     case CommandFailed(_: Bind) => context stop self
 
     case Connected(remote, local) =>
-      val handler = context.actorOf(EchoHandler.props(sender))
+      val handler = context.actorOf(ApiHandler.props(sender))
       sender ! Register(handler)
   }
 
