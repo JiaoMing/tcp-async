@@ -5,7 +5,7 @@ import akka.io.Tcp
 import java.net.InetSocketAddress
 
 object EchoHandler {
-  def props(connection: ActorRef, remote: InetSocketAddress = null): Props =
+  def props(connection: ActorRef): Props =
     Props(classOf[EchoHandler], connection)
 }
 
