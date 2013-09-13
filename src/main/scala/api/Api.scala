@@ -23,13 +23,12 @@ object Api {
    */
   def httpRequest(method: HttpMethod = GET,
                   uri: String,
-                  data: String = "",
-                  contentType: ContentType = MediaTypes.`application/x-www-form-urlencoded`) = {
+                  data: String = "") = {
     val pipeline = sendReceive
     pipeline {
       HttpRequest(method = method,
         uri = uri,
-        entity = HttpEntity(contentType, data))
+        entity = HttpEntity(data))
     }
   }
 }

@@ -6,8 +6,7 @@ scalaVersion := "2.10.2"
 
 resolvers ++= Seq(
 "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
-"spray repo" at "http://nightlies.spray.io",
-"Mandubian repository snapshots" at "https://github.com/mandubian/mandubian-mvn/raw/master/snapshots/"
+"spray repo" at "http://nightlies.spray.io"
 )
 
 libraryDependencies ++= Seq(
