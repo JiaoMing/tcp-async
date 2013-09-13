@@ -21,10 +21,6 @@
     </p>
 
     <img src="tutorial/tcp-async.png" style="width:400px">
-
-    <p>
-        For further information about used technologies, please refer to References section.
-    </p>
 </div>
 
 <div>
@@ -395,9 +391,41 @@
     </p>
 
     <p>
-        <code>httpRequest</code> 
-    </p>
+        <code>sendReceive(line 28)</code> produces a function (HttpRequest => Future[HttpResponse])
+        from now on you can make your HttpRequest with it.
+
+        <pre><code>
+            val pipeline = sendReceive
+            pipeline {
+              HttpRequest(method = "HttpMethod",
+                uri = "ApiUri",
+                entity = HttpEntity("contentType", "data"))
+            }
+        </code></pre>
 </div>
 
+<div>
+    <h2>From Now On</h2>
+
+    <p>
+        <a href="http://spray.io/documentation/1.2-M8/spray-client/">spray-client</a> 
+        have useful features like Authentication or marshalling/unmarshalling from and to your custom types.
+        If you need a more basic Http server/client module, you can look at 
+        <a href="http://spray.io/documentation/1.2-M8/spray-can/">spray-can</a> which spray client also uses
+        under the hood.
+    </p>
+
+    <p>
+        <a href="https://github.com/mauricio/postgresql-async">postgresql/mysql-async</a> is also more featured than shown in tutorial. Take a look at it.
+    </p>
+
+    <p>
+        <a href="http://www.akka.io">AkkaIO</a> can also provide you Http or even Udp query Handler if you need.
+    </p>
+
+    <p>
+        You can define new Servers, Handlers or merge them according to your needs. May the <b>async</b> be with you.
+    </p>
+</div>
 </body>
 </html>
