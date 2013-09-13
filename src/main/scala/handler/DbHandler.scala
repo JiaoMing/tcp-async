@@ -25,7 +25,7 @@ class DbHandler(connection: ActorRef) extends Handler {
    */
   def receive = {
     case Received(data) => {
-      DB.execute("insert into demo values (?)", Array(data.utf8String.trim() + "--" + new Date()))
+      DB.execute("insert into demo values (?)", Array(data.utf8String.trim + "--" + new Date))
       connection ! Write(ByteString("values in db are: \n"))
       DB.rawQuery("select * from demo") map (result => {
         result.rows.get.map(data => {

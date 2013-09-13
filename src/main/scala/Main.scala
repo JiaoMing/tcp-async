@@ -3,5 +3,5 @@ import server.TcpServer
 
 object Main extends App {
   val system = ActorSystem("server")
-  val service = system.actorOf(TcpServer.props(), "ServerActor")
+  val service = system.actorOf(TcpServer.props, "ServerActor")
 }

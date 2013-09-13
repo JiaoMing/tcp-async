@@ -24,7 +24,7 @@ class ApiHandler(connection: ActorRef) extends Handler {
    */
   def receive = {
     case Received(data) => {
-      val uri = Conf.apiUrl + data.utf8String.trim()
+      val uri = Conf.apiUrl + data.utf8String.trim
       Api.httpRequest(method = GET, uri = uri) map { response =>
         respond(response.entity.asString)
       }

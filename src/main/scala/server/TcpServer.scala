@@ -7,7 +7,7 @@ import util._
 import handler._
 
 object TcpServer {
-  def props(): Props =
+  def props: Props =
     Props(classOf[TcpServer])
 }
 

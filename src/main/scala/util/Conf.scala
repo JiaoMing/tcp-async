@@ -4,8 +4,8 @@ import com.typesafe.config.ConfigFactory
 
 object Conf {
 
-  val config = ConfigFactory.load()
-  config.checkValid(ConfigFactory.defaultReference())
+  val config = ConfigFactory.load
+  config.checkValid(ConfigFactory.defaultReference)
 
   val dbUsername = config.getString("db.username")
   val dbPassword = config.getString("db.password")

@@ -42,11 +42,11 @@
         Application uses this object when needed instead of reading <code>.conf</code> file every time.
 
         <pre><code>
-            val uri = Conf.apiUrl + data.utf8String.trim()
+            val uri = Conf.apiUrl + data.utf8String.trim
             // Instead of:
-            // val config = ConfigFactory.load()
-            // config.checkValid(ConfigFactory.defaultReference())
-            // val uri = config.getString("api.url") + data.utf8String.trim()
+            // val config = ConfigFactory.load
+            // config.checkValid(ConfigFactory.defaultReference)
+            // val uri = config.getString("api.url") + data.utf8String.trim
         </code></pre>
 
         For more information, please see 
@@ -115,7 +115,7 @@
     <p>
         And a Server actor definition which is our next subject:
         <pre><code>
-            val service = system.actorOf(TcpServer.props(), "ServerActor")
+            val service = system.actorOf(TcpServer.props, "ServerActor")
         </code></pre>
     </p>
 
@@ -144,7 +144,7 @@
     </p>
 
     <p>
-        Just below that, you can see <code>receive()</code> method:
+        Just below that, you can see <code>receive</code> method:
     </p>
 
     <pre><code>
@@ -158,7 +158,7 @@
     </code></pre>
 
     <p>
-        <code>receive()</code> creates a new
+        <code>receive</code> creates a new
         <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> 
         and registers it to sender. Which means server creates a connection with sender.
         But the key part here is that connection with sender(client) is not managed by server itself.
