@@ -22,8 +22,8 @@ object Api {
    * @return
    */
   def httpRequest(method: HttpMethod = GET,
-                  uri: String,
-                  data: String = "") = {
+    uri: String,
+    data: String = "") = {
     val pipeline = sendReceive
     pipeline {
       HttpRequest(method = method,
