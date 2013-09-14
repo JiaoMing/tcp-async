@@ -1,39 +1,34 @@
 package handler
 
-import akka.actor.{Props, ActorRef}
-import akka.io.Tcp
+import akka.actor.Props
 import db.DB
 import akka.util.ByteString
-import scala.concurrent.ExecutionContext.Implicits.global
 import com.github.mauricio.async.db.RowData
 import java.util.Date
 import scala.Array
+import akka.io.Tcp.Write
+import scala.concurrent.ExecutionContext.Implicits.global
 
-object DbHandler {
-  def props(connection: ActorRef): Props = Props(classOf[DbHandler], connection)
+object DbHandler extends HandlerProp {
+  def props: Props = Props(classOf[DbHandler])
 }
 
-class DbHandler(connection: ActorRef) extends Handler {
-
-  import Tcp._
-
-  context.watch(connection)
+class DbHandler extends Handler {
 
   /**
    * Writes incoming message to database and returns all data in db to user
    * @return
    */
-  def receive = {
-    case Received(data) => {
-      DB.execute("insert into demo values (?)", Array(data.utf8String.trim + "--" + new Date))
-      connection ! Write(ByteString("values in db are: \n"))
-      DB.rawQuery("select * from demo") map (result => {
-        result.rows.get.map(data => {
-          respond(data)
-        })
-      })
+  def received(data: String) = {
+    DB.execute("INSERT INTO demo VALUES (?)", Array(data + "--" + new Date))
+    connection ! Write(ByteString("values in db are: \n"))
+    for {
+      queryResult <- DB.rawQuery("SELECT * FROM demo")
+      resultSet <- queryResult.rows
+      result <- resultSet
+    } {
+      respond(result)
     }
-    case PeerClosed => context stop self
   }
 
   /**
