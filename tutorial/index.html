@@ -7,11 +7,11 @@
 <div>
     <h2> Introduction </h2>
     <p>
-        tcp-async, as the name implies, handles tcp requests asynchronously with 
-        <a href="http://www.akka.io">AkkaIO</a>.
+        tcp-async, as the name implies, handles tcp requests reactively using 
+        <a href="http://www.akka.io">Akka I/O</a>.
     </p>
     <p> 
-        Thanks to akka-io, <code>tcp-handler</code> can respond high amount of requests simultaneously. Whole app have an asynchronous design.
+        Thanks to akka-io, <code>tcp-async</code> can serve high amount of requests concurrently. Whole application is designed to be reactive top to bottom.
     </p>
 
     <p>
@@ -125,7 +125,7 @@
     <h2> Handling Connections: Server</h2>
     <p> 
         <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
-        is an actor which listen connections .
+        is an actor which waits for connections .
         This could be a Http, Tcp or Udp request. You should implement a Server actor for the type you wish to use. 
         <code>tcp-async</code> have a
         <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a> 
@@ -169,7 +169,7 @@
     </p>
 
     <p><i>
-        Remember, 10k actors doesn't mean 10k threads.
+        Remember, 10K actors doesn't mean 10K threads.
     </i></p> 
 
     <p>
