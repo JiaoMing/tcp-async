@@ -11,6 +11,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.2.0",
+  "com.typesafe.akka" %% "akka-testkit" % "2.2.0",
   "com.github.mauricio" %% "mysql-async" % "0.2.6",
   "com.typesafe" % "config" % "1.0.2",
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
