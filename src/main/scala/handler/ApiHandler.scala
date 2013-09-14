@@ -1,6 +1,6 @@
 package handler
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.Props
 import akka.util.ByteString
 import scala.concurrent.ExecutionContext.Implicits.global
 import api.Api

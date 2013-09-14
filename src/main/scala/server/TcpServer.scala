@@ -8,8 +8,7 @@ import handler._
 import akka.io.Tcp.{Register, Connected, CommandFailed, Bind}
 
 object TcpServer {
-  def props(handlerProp: HandlerProp): Props =
-    Props(classOf[TcpServer], handlerProp)
+  def props(handlerProp: HandlerProp): Props = Props(classOf[TcpServer], handlerProp)
 }
 
 class TcpServer(handlerProp: HandlerProp) extends Server {
