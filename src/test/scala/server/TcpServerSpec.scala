@@ -1,6 +1,6 @@
 package server
 
-import akka.actor.{Props, ActorSystem}
+import akka.actor.{ Props, ActorSystem }
 import akka.io.Tcp.{ Register, Connected }
 import akka.testkit.TestKit
 import java.net.InetSocketAddress

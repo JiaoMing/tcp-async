@@ -1,11 +1,11 @@
 package server
 
 import akka.actor.Props
-import akka.io.{IO, Tcp}
+import akka.io.{ IO, Tcp }
 import java.net.InetSocketAddress
 import util._
 import handler._
-import akka.io.Tcp.{Register, Connected, CommandFailed, Bind}
+import akka.io.Tcp.{ Register, Connected, CommandFailed, Bind }
 
 object TcpServer {
   def props(handlerProp: HandlerProp): Props = Props(classOf[TcpServer], handlerProp)

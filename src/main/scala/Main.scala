@@ -1,5 +1,5 @@
 import akka.actor.ActorSystem
-import handler.{ApiHandler, EchoHandler, DbHandler}
+import handler.{ ApiHandler, EchoHandler, DbHandler }
 import server.TcpServer
 
 object MainWithEchoHandler extends App {
