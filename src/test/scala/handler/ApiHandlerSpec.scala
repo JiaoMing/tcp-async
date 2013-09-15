@@ -23,8 +23,9 @@ class ApiHandlerSpec(_system: ActorSystem)
 
   "An ApiHandler" must {
 
-    "return the elavation" in {
-      val handler = system.actorOf(ApiHandler.props(testActor))
+    "return the elevation" in {
+      val handler = system.actorOf(ApiHandler.props)
+      handler ! RegisterConnection(testActor)
       val data = ByteString("hello")
       handler ! Received(data)
       val Write(message, _) = expectMsgPF() { case message: Write => message }
@@ -32,7 +33,8 @@ class ApiHandlerSpec(_system: ActorSystem)
     }
 
     "close itself if peer closed" in {
-      val handler = system.actorOf(ApiHandler.props(testActor))
+      val handler = system.actorOf(ApiHandler.props)
+      handler ! RegisterConnection(testActor)
       watch(handler)
       handler ! PeerClosed
       expectTerminated(handler)

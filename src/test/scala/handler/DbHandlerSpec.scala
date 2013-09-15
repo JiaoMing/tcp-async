@@ -22,7 +22,8 @@ class DbHandlerSpec(_system: ActorSystem)
 
     /*
     "close itself if peer closed" in {
-      val handler = system.actorOf(DbHandler.props(testActor))
+      val handler = system.actorOf(DbHandler.props)
+      handler ! RegisterConnection(testActor)
       watch(handler)
       handler ! PeerClosed
       expectTerminated(handler)

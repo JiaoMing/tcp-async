@@ -1,33 +1,18 @@
 package handler
 
 import akka.actor._
-import akka.io.Tcp
-import java.net.InetSocketAddress
+import akka.util.ByteString
+import akka.io.Tcp.Write
 
-object EchoHandler {
-  def props(connection: ActorRef): Props =
-    Props(classOf[EchoHandler], connection)
+object EchoHandler extends HandlerProp {
+  def props: Props = Props(classOf[EchoHandler])
 }
 
-class EchoHandler(connection: ActorRef) extends Handler {
-
-  import Tcp._
-
-  context.watch(connection)
+class EchoHandler extends Handler {
 
   /**
    * Echoes incoming message.
    * @return
    */
-  def receive = {
-    case Received(data) => {
-      val text = data.utf8String.trim
-      text match {
-        case "close" => context.stop(self)
-        case _ => connection ! Write(data)
-      }
-    }
-
-    case PeerClosed => context stop self
-  }
+  def received(data: String) = connection ! Write(ByteString(data + "\n"))
 }
