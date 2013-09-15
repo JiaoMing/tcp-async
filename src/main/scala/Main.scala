@@ -4,18 +4,15 @@ import server.TcpServer
 
 object MainWithEchoHandler extends App {
   val system = ActorSystem("server")
-  implicit val handlerProps = EchoHandlerProps
-  val service = system.actorOf(Props(new TcpServer[EchoHandler]), "ServerActor")
+  val service = system.actorOf(TcpServer.props(EchoHandlerProps), "ServerActor")
 }
 
 object MainWithApiHandler extends App {
   val system = ActorSystem("server")
-  implicit val handlerProps = ApiHandlerProps
-  val service = system.actorOf(Props(new TcpServer[ApiHandler]), "ServerActor")
+  val service = system.actorOf(TcpServer.props(ApiHandlerProps), "ServerActor")
 }
 
 object MainWithDbHandler extends App {
   val system = ActorSystem("server")
-  implicit val handlerProps = DbHandlerProps
-  val service = system.actorOf(Props(new TcpServer[DbHandler]), "ServerActor")
+  val service = system.actorOf(TcpServer.props(DbHandlerProps), "ServerActor")
 }

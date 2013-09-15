@@ -3,11 +3,9 @@ package handler
 import akka.actor.{ Props, ActorRef, Actor }
 import akka.io.Tcp._
 import akka.io.Tcp.Received
-import scala.reflect.ClassTag
 
-class HandlerProps[T <: Handler: ClassTag] {
-  def props(connection: ActorRef): Props =
-    Props(implicitly[ClassTag[T]].runtimeClass, connection)
+trait HandlerProps {
+  def props(connection: ActorRef): Props
 }
 
 abstract class Handler(val connection: ActorRef) extends Actor {

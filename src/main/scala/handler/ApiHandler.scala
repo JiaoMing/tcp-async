@@ -6,9 +6,11 @@ import api.Api
 import spray.http.HttpMethods._
 import util.Conf
 import akka.io.Tcp.Write
-import akka.actor.ActorRef
+import akka.actor.{ Props, ActorRef }
 
-object ApiHandlerProps extends HandlerProps[ApiHandler]
+object ApiHandlerProps extends HandlerProps {
+  def props(connection: ActorRef) = Props(classOf[ApiHandler], connection)
+}
 
 class ApiHandler(connection: ActorRef) extends Handler(connection) {
 
