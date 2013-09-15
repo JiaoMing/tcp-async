@@ -1,17 +1,12 @@
 package server
 
-import akka.actor.Props
 import akka.io.{ IO, Tcp }
 import java.net.InetSocketAddress
 import util._
 import handler._
 import akka.io.Tcp.{ Register, Connected, CommandFailed, Bind }
 
-object TcpServer {
-  def props(handlerProp: HandlerProp): Props = Props(classOf[TcpServer], handlerProp)
-}
-
-class TcpServer(handlerProp: HandlerProp) extends Server {
+class TcpServer[T <: Handler: HandlerProps] extends Server {
 
   import context.system
 
@@ -21,8 +16,7 @@ class TcpServer(handlerProp: HandlerProp) extends Server {
     case CommandFailed(_: Bind) => context stop self
 
     case Connected(remote, local) =>
-      val handler = context.actorOf(handlerProp.props)
-      handler ! RegisterConnection(sender)
+      val handler = context.actorOf(implicitly[HandlerProps[T]].props(sender))
       sender ! Register(handler)
   }
 

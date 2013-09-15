@@ -7,6 +7,7 @@ import akka.testkit.{ ImplicitSender, TestKit }
 import akka.io.Tcp._
 import akka.util.ByteString
 import akka.io.Tcp.Received
+import scala.concurrent.duration._
 
 class ApiHandlerSpec(_system: ActorSystem)
     extends TestKit(_system)
@@ -24,17 +25,15 @@ class ApiHandlerSpec(_system: ActorSystem)
   "An ApiHandler" must {
 
     "return the elevation" in {
-      val handler = system.actorOf(ApiHandler.props)
-      handler ! RegisterConnection(testActor)
+      val handler = system.actorOf(new HandlerProps[ApiHandler].props(testActor))
       val data = ByteString("hello")
       handler ! Received(data)
-      val Write(message, _) = expectMsgPF() { case message: Write => message }
+      val Write(message, _) = expectMsgPF(5.seconds) { case message: Write => message }
       message.utf8String must not be ('empty)
     }
 
     "close itself if peer closed" in {
-      val handler = system.actorOf(ApiHandler.props)
-      handler ! RegisterConnection(testActor)
+      val handler = system.actorOf(new HandlerProps[ApiHandler].props(testActor))
       watch(handler)
       handler ! PeerClosed
       expectTerminated(handler)

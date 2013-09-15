@@ -1,18 +1,14 @@
 package handler
 
-import akka.actor.Props
 import akka.util.ByteString
 import scala.concurrent.ExecutionContext.Implicits.global
 import api.Api
 import spray.http.HttpMethods._
 import util.Conf
 import akka.io.Tcp.Write
+import akka.actor.ActorRef
 
-object ApiHandler extends HandlerProp {
-  def props: Props = Props(classOf[ApiHandler])
-}
-
-class ApiHandler extends Handler {
+class ApiHandler(connection: ActorRef) extends Handler(connection) {
 
   /**
    * Makes an api request to Google Elevation API with given location data and returns response to user.

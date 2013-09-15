@@ -1,19 +1,15 @@
 package handler
 
-import akka.actor.Props
 import db.DB
 import akka.util.ByteString
 import com.github.mauricio.async.db.RowData
 import java.util.Date
 import scala.Array
 import akka.io.Tcp.Write
+import akka.actor.ActorRef
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object DbHandler extends HandlerProp {
-  def props: Props = Props(classOf[DbHandler])
-}
-
-class DbHandler extends Handler {
+class DbHandler(connection: ActorRef) extends Handler(connection) {
 
   /**
    * Writes incoming message to database and returns all data in db to user
