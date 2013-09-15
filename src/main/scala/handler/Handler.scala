@@ -10,8 +10,6 @@ class HandlerProps[T <: Handler: ClassTag] {
     Props(implicitly[ClassTag[T]].runtimeClass, connection)
 }
 
-case class RegisterConnection(connection: ActorRef)
-
 abstract class Handler(val connection: ActorRef) extends Actor {
 
   val abort = "(?i)abort".r
