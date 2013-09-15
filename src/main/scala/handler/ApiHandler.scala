@@ -8,6 +8,8 @@ import util.Conf
 import akka.io.Tcp.Write
 import akka.actor.ActorRef
 
+object ApiHandlerProps extends HandlerProps[ApiHandler]
+
 class ApiHandler(connection: ActorRef) extends Handler(connection) {
 
   /**

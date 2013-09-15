@@ -9,6 +9,8 @@ import akka.io.Tcp.Write
 import akka.actor.ActorRef
 import scala.concurrent.ExecutionContext.Implicits.global
 
+object DbHandlerProps extends HandlerProps[DbHandler]
+
 class DbHandler(connection: ActorRef) extends Handler(connection) {
 
   /**
@@ -22,9 +24,7 @@ class DbHandler(connection: ActorRef) extends Handler(connection) {
       queryResult <- DB.rawQuery("SELECT * FROM demo")
       resultSet <- queryResult.rows
       result <- resultSet
-    } {
-      respond(result)
-    }
+    } respond(result)
   }
 
   /**
