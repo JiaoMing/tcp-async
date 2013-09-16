@@ -21,12 +21,14 @@ class DbHandler(connection: ActorRef) extends Handler(connection) {
    */
   def received(data: String) = {
     DB.execute("INSERT INTO demo VALUES (?)", Array(data + "--" + new Date))
-    connection ! Write(ByteString("values in db are: \n"))
-    for {
-      queryResult <- DB.rawQuery("SELECT * FROM demo")
-      resultSet <- queryResult.rows
-      result <- resultSet
-    } respond(result)
+      .map { _ =>
+        connection ! Write(ByteString("values in db are: \n"))
+        for {
+          queryResult <- DB.fetch("SELECT * FROM demo")
+          resultSet <- queryResult
+          result <- resultSet
+        } respond(result)
+      }
   }
 
   /**

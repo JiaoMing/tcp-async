@@ -2,28 +2,26 @@ package db
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import com.github.mauricio.async.db.RowData
+import com.github.mauricio.async.db.{ QueryResult, ResultSet }
 
 object DB {
   val pool = Pool.pool
 
   /**
-   * Creates an prepared statement with given query
-   * and passes it to connection pool with given values.
-   * @param query
-   * @param values
-   * @return
+   * Creates a prepared statement with the given query
+   * and passes it to the connection pool with given values.
    */
-  def execute(query: String, values: Seq[Any]): Future[IndexedSeq[RowData]] = {
-    pool.sendPreparedStatement(query, values).map(result => result.rows.get.map(item => item))
+  def execute(query: String, values: Any*): Future[QueryResult] = values match {
+    case _ :: _ => pool.sendPreparedStatement(query, values)
+    case Nil => pool.sendQuery(query)
   }
 
   /**
-   * Passes given query to connection pool.
-   * @param query
-   * @return
+   * Creates a prepared statement with the given query
+   * and passes it to the connection pool with given values.
+   * @return ResultSet of the query
    */
-  def rawQuery(query: String) = {
-    pool.sendQuery(query)
-  }
+  def fetch(query: String, values: Any*): Future[Option[ResultSet]] =
+    execute(query, values).map(_.rows)
+
 }
