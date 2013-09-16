@@ -11,9 +11,11 @@ object DB {
    * Creates a prepared statement with the given query
    * and passes it to the connection pool with given values.
    */
-  def execute(query: String, values: Any*): Future[QueryResult] = values match {
-    case _ :: _ => pool.sendPreparedStatement(query, values)
-    case Nil => pool.sendQuery(query)
+  def execute(query: String, values: Any*): Future[QueryResult] = {
+    if ( values.size > 0 )
+      pool.sendPreparedStatement(query, values)
+    else
+      pool.sendQuery(query)
   }
 
   /**

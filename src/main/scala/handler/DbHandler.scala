@@ -4,7 +4,6 @@ import db.DB
 import akka.util.ByteString
 import com.github.mauricio.async.db.RowData
 import java.util.Date
-import scala.Array
 import akka.io.Tcp.Write
 import akka.actor.{ Props, ActorRef }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,7 +19,7 @@ class DbHandler(connection: ActorRef) extends Handler(connection) {
    * @return
    */
   def received(data: String) = {
-    DB.execute("INSERT INTO demo VALUES (?)", Array(data + "--" + new Date))
+    DB.execute("INSERT INTO demo VALUES (?)", data + "--" + new Date)
       .map { _ =>
         connection ! Write(ByteString("values in db are: \n"))
         for {
@@ -28,7 +27,7 @@ class DbHandler(connection: ActorRef) extends Handler(connection) {
           resultSet <- queryResult
           result <- resultSet
         } respond(result)
-      }
+    }
   }
 
   /**
