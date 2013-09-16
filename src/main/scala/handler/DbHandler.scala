@@ -12,24 +12,25 @@ object DbHandlerProps extends HandlerProps {
   def props(connection: ActorRef) = Props(classOf[DbHandler], connection)
 }
 
-class DbHandler(connection: ActorRef) extends Handler(connection) {
+class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
 
   /**
    * Writes incoming message to database and returns all data in db to user
    * @return
    */
-  def received(data: String) = {
-    DB.execute("INSERT INTO demo VALUES (?)", data + "--" + new Date)
-      .map { _ =>
-        connection ! Write(ByteString("values in db are: \n"))
-        for {
-          queryResult <- DB.fetch("SELECT * FROM demo")
-          resultSet <- queryResult
-          result <- resultSet
-        } respond(result)
-    }
+  def received(data: String) {
+    execute("INSERT INTO demo VALUES (?)", data + "--" + new Date)
+    printAll()
   }
 
+  def printAll() {
+    connection ! Write(ByteString("values in db are: \n"))
+    for {
+      queryResult <- fetch("SELECT * FROM demo")
+      resultSet <- queryResult
+      result <- resultSet
+    } respond(result)
+  }
   /**
    * Convert given data and send it to user
    * @param response

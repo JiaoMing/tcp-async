@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import com.github.mauricio.async.db.{ QueryResult, ResultSet }
 
-object DB {
+trait DB {
   val pool = Pool.pool
 
   /**
