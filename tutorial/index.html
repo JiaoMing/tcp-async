@@ -254,7 +254,7 @@
         writes incoming message to a MySQL database and returns all data in database to sender.
     </p>
 
-    <p><b>Note: In order to use DbHandler, you must have an MySQL Database and valid
+    <p><b>Note: In order to use DbHandler, you must have a MySQL Database and valid
         database configurations for it.
     </b></p>
 
@@ -272,9 +272,11 @@
         define callbacks to this.
 
         <pre><code>
-            DB.rawQuery("select * from demo") map (result => {
-                // do something
-            })
+            for {
+              queryResult <- DB.fetch("YourQuery")
+              resultSet <- queryResult
+              result <- resultSet
+            } yield result
         </code></pre>
     </p>
 
@@ -305,31 +307,30 @@
 
     <p>
         <a href="#code/src/main/scala/db/DB.scala" class="shortcut">DB</a>
-        is used to execute queries. There are two type of query methods, <code>prepared statement</code> and 
-        <code>raw query</code>
+        is used to execute queries.
 
     </p>
 
     <p>
         <pre><code>
-            def execute(query: String, values: Seq[Any]): Future[IndexedSeq[RowData]] = {
-                pool.sendPreparedStatement(query, values).map(result => 
-                    result.rows.get.map(item => item))
+            def execute(query: String, values: Any*): Future[QueryResult] = {
+                if ( values.size > 0 )
+                    pool.sendPreparedStatement(query, values)
+                else
+                    pool.sendQuery(query)
             }
         </code></pre>
          
-         <code>execute</code> creates a prepared statement for executing query. This protect us from
-         SQL injections.
+         If <code>values</code> parameter isn't defined, query is executed as raw query. This means, no parameter binding, no prepared statement. Otherwise query is assumed as prepared statement and executed with given values.
     </p>
 
-    <p>
+    <p> 
+        If you only need <code>ResultSet</code>, you can use <code>fetch</code>:
+
         <pre><code>
-            def rawQuery(query: String) = {
-                pool.sendQuery(query)
-            }
+            def fetch(query: String, values: Any*): Future[Option[ResultSet]] =
+                execute(query, values).map(_.rows)
         </code></pre>
-        
-        When you need more power, you can execute your query directly with <code>rawQuery</code>.
     </p>
 </div>
 
