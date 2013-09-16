@@ -29,7 +29,7 @@
         You should know some basic structures before scrolling around the template:
     </p>
 
-    <h3>Config</h3>
+    <h3>Configuration</h3>
     
     <p> Every configuration data stands in 
         <a href="#code/src/main/resources/application.conf" class="shortcut">application.conf</a>.
@@ -37,7 +37,7 @@
     </p>
 
     <p> 
-        At the starting of the application, all configurations is loaded to a
+        When the application starts, configuration is loaded to a
         <a href="#code/src/main/scala/util/Conf.scala" class="shortcut">Conf</a> object. 
         Application uses this object when needed instead of reading <code>.conf</code> file every time.
 
@@ -86,20 +86,6 @@
         context.actorOf(DemoActor.props(args))
     </code></pre>
 
-
-    <h3>ActorRef</h3>
-
-    <p>
-        <a href="http://doc.akka.io/docs/akka/2.2.1/general/addressing.html">ActorRef</a>
-        is simply a reference to actor whose foremost purpose is to support sending messages to the actor it represents.
-    </p>
-
-    <h3>Dependencies</h3>
-    <p>
-        Dependencies defines in 
-        <a href="#code/build.sbt" class="shortcut">build.sbt</a> file.
-    </p>
-
 </div>
 
 <div>
@@ -125,19 +111,15 @@
     <h2> Handling Connections: Server</h2>
     <p> 
         <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
-        is an actor which waits for connections .
-        This could be a Http, Tcp or Udp request. You should implement a Server actor for the type you wish to use. 
-        <code>tcp-async</code> have a
-        <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a> 
-        within. 
+        is an actor which waits for connections. This could be a Http, Tcp or Udp request. You should implement a Server actor for the type you wish to use.
+        <code>tcp-async</code> comes with a builtin <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a>.
     </p>
 
     <p>
-        Every 
-        <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
+        Eeach <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
         actor binds to an InetSocketAdress. In this case,
         <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a>
-        listens incoming Tcp requests with following binding:
+        listens for incoming Tcp requests with following binding:
         <pre><code>
             IO(Tcp) ! Bind(self, new InetSocketAddress(Conf.appHostName, Conf.appPort))
         </code></pre>
@@ -164,8 +146,8 @@
         But the key part here is that connection with sender(client) is not managed by server itself.
         Every connection is handled by a Handler actor instance.
         That means Server actor doesn't need to deal with them. 
-        Thus there is no impediment about connection count. According to some tests that we've made, 
-        10k requests can be easily handled by tcp-async.
+        Thus there is no impediment about connection count. According to load tests we have made, 
+        10K requests can be easily handled by tcp-async.
     </p>
 
     <p><i>
@@ -185,13 +167,13 @@
 <div>
     <h2>Deciding What To Do: Handler</h2>
     <p>
-        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> is an Actor that decide what to do with incoming request. The receive method should define a series of case statements that
+        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> is an Actor which decides what to do with incoming requests. The receive method should define a partial function that
         decides which messages your handler can handle, using standard Scala pattern matching, along with the implementation
         of how the messages should be processed.
     </p>
 
     <p>
-        Handling requests managed in <code>receive</code> method.
+        Handling requests managed in <code>receive</code> function.
 
         <pre><code>
             def receive = {
@@ -211,7 +193,7 @@
          </code></pre>
     </p>
 
-    <p> tcp-async contains three type of handlers: </p>
+    <p> tcp-async contains three types of handlers: </p>
         <a href="#code/src/main/scala/handler/EchoHandler.scala" class="shortcut">EchoHandler</a>
         <br />
         <a href="#code/src/main/scala/handler/DbHandler.scala" class="shortcut">DbHandler</a>
@@ -224,8 +206,7 @@
     <h2>Repeat After Me: EchoHandler</h2>
     <p>
         <a href="#code/src/main/scala/handler/EchoHandler.scala" class="shortcut">EchoHandler</a>,
-        as you can guess,
-        echoes incoming message unless the message is <code>"close"</code>. 
+        as you can guess, echoes incoming message unless the message is <code>"close"</code>.
         In this case Handler closes connection with sender.
 
         <pre><code>
@@ -255,7 +236,7 @@
     </p>
 
     <p><b>Note: In order to use DbHandler, you must have a MySQL Database and valid
-        database configurations for it.
+        database configuration for it.
     </b></p>
 
     <p>
@@ -268,7 +249,7 @@
     </p>
 
     <p>
-        Queries returns <code>Future[IndexedSeq[RowData]]</code>. For able to use results, we must
+        Queries return <code>Future[IndexedSeq[RowData]]</code>. For able to use results, we must
         define callbacks to this.
 
         <pre><code>
@@ -381,7 +362,7 @@
     </p>
 
     <p>
-        Don't forget to create ByteString conversations.
+        Don't forget to create ByteString convertions.
     </p>
 
     <p>
@@ -421,7 +402,7 @@
     </p>
 
     <p>
-        <a href="http://www.akka.io">AkkaIO</a> can also provide you Http or even Udp query Handler if you need.
+        <a href="http://doc.akka.io/docs/akka/2.2.1/scala/io.html">Akka I/O</a> can also provide you HTTP or even UDP query Handler if you need.
     </p>
 
     <p>
