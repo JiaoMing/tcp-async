@@ -24,16 +24,14 @@ class EchoHandlerSpec(_system: ActorSystem)
   "A EchoHandler" must {
 
     "echo the message" in {
-      val handler = system.actorOf(EchoHandler.props)
-      handler ! RegisterConnection(testActor)
+      val handler = system.actorOf(EchoHandlerProps.props(testActor))
       val data = ByteString("hello")
       handler ! Received(data)
       expectMsg(Write(ByteString("hello\n")))
     }
 
     "send Close message to connection if close message is received" in {
-      val handler = system.actorOf(EchoHandler.props)
-      handler ! RegisterConnection(testActor)
+      val handler = system.actorOf(EchoHandlerProps.props(testActor))
       watch(handler)
       val data = ByteString("close")
       handler ! Received(data)
@@ -41,16 +39,14 @@ class EchoHandlerSpec(_system: ActorSystem)
     }
 
     "close itself if Closed is received" in {
-      val handler = system.actorOf(EchoHandler.props)
-      handler ! RegisterConnection(testActor)
+      val handler = system.actorOf(EchoHandlerProps.props(testActor))
       watch(handler)
       handler ! Closed
       expectTerminated(handler)
     }
 
     "close itself if peer closed" in {
-      val handler = system.actorOf(EchoHandler.props)
-      handler ! RegisterConnection(testActor)
+      val handler = system.actorOf(EchoHandlerProps.props(testActor))
       watch(handler)
       handler ! PeerClosed
       expectTerminated(handler)

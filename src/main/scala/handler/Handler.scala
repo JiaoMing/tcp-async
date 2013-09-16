@@ -1,32 +1,20 @@
 package handler
 
-import akka.actor.{Props, ActorRef, Actor}
+import akka.actor.{ Props, ActorRef, Actor }
 import akka.io.Tcp._
 import akka.io.Tcp.Received
 
-trait HandlerProp {
-  def props: Props
+trait HandlerProps {
+  def props(connection: ActorRef): Props
 }
 
-case class RegisterConnection(connection: ActorRef)
-
-trait Handler extends Actor {
+abstract class Handler(val connection: ActorRef) extends Actor {
 
   val abort = "(?i)abort".r
   val confirmedClose = "(?i)confirmedclose".r
   val close = "(?i)close".r
 
-  var connection: ActorRef = null
-
-  def init: Receive = {
-    case RegisterConnection(c) =>
-      connection = c
-      context become handling
-    case _ =>
-      println("Please register connection first")
-  }
-
-  def handling: Receive = {
+  def receive: Receive = {
     case Received(data) =>
       data.utf8String.trim match {
         case abort() => sender ! Abort
@@ -35,40 +23,38 @@ trait Handler extends Actor {
         case str => received(str)
       }
     case PeerClosed =>
-      peerClosed
-      stop
+      peerClosed()
+      stop()
     case Closed =>
-      closed
-      stop
+      closed()
+      stop()
     case ConfirmedClosed =>
-      confirmedClosed
-      stop
+      confirmedClosed()
+      stop()
     case Aborted =>
-      aborted
-      stop
+      aborted()
+      stop()
   }
-
-  def receive: Receive = init
 
   def received(str: String): Unit
 
-  def peerClosed: Unit = {
+  def peerClosed() {
     println("PeerClosed")
   }
 
-  def closed: Unit = {
+  def closed() {
     println("Closed")
   }
 
-  def confirmedClosed: Unit = {
+  def confirmedClosed() {
     println("ConfirmedClosed")
   }
 
-  def aborted: Unit = {
+  def aborted() {
     println("Aborted")
   }
 
-  def stop = {
+  def stop() {
     println("Stopping")
     context stop self
   }
