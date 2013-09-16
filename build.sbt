@@ -22,3 +22,6 @@ libraryDependencies ++= Seq(
   "io.spray" % "spray-client" % "1.2-20130912"
 )
 
+seq(ScctPlugin.instrumentSettings : _*)
+
+seq(com.github.theon.coveralls.CoverallsPlugin.coverallsSettings: _*)
