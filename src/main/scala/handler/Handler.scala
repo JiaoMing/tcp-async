@@ -17,9 +17,9 @@ abstract class Handler(val connection: ActorRef) extends Actor {
   def receive: Receive = {
     case Received(data) =>
       data.utf8String.trim match {
-        case abort() => sender ! Abort
-        case confirmedClose() => sender ! ConfirmedClose
-        case close() => sender ! Close
+        case abort() => connection ! Abort
+        case confirmedClose() => connection ! ConfirmedClose
+        case close() => connection ! Close
         case str => received(str)
       }
     case PeerClosed =>
