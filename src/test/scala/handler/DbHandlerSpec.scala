@@ -27,7 +27,7 @@ class DbHandlerSpec(_system: ActorSystem)
   override def afterAll {
     TestKit.shutdownActorSystem(system)
   }
-  //coh da iyi oldu coh da guzel oldu taam mi
+
   "DbHandler.received" must {
     val testActorRef = TestActorRef[DbHandler](Props(new DbHandler(testActor)))
     val handler = testActorRef.underlyingActor
