@@ -11,6 +11,7 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.mockito.{ArgumentMatcher, Matchers}
 import collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class DbHandlerSpec(_system: ActorSystem)
@@ -32,11 +33,10 @@ class DbHandlerSpec(_system: ActorSystem)
     val handler = testActorRef.underlyingActor
     val spyHandler = spy(handler)
     val mockInput = "mockInput"
-    val mockQueryResultFuture = mock[Future[QueryResult]]
+    val mockQueryResultFuture = Future{mock[QueryResult]}
 
     doReturn(mockQueryResultFuture).when(spyHandler).execute(anyString(), anyString())
     doNothing().when(spyHandler).printAll()
-
 
     spyHandler.received(mockInput)
     "execute proper query with given parameter" in {

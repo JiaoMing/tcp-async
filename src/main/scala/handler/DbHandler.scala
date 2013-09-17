@@ -19,8 +19,10 @@ class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
    * @return
    */
   def received(data: String) {
-    execute("INSERT INTO demo VALUES (?)", data + "--" + new Date)
-    printAll()
+    execute("INSERT INTO demo VALUES (?)", data + "--" + new Date).foreach {
+      _ =>
+        printAll()
+    }
   }
 
   def printAll() {
