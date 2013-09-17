@@ -22,19 +22,31 @@ class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
     execute("INSERT INTO demo VALUES (?)", data + "--" + new Date).foreach(_ => printAll())
   }
 
+  /**
+   * Prints all data in db to user
+   */
   def printAll() {
-    connection ! Write(ByteString("values in db are: \n"))
+    write("values in db are: \n")
     for {
       queryResult <- fetch("SELECT * FROM demo")
       resultSet <- queryResult
       result <- resultSet
     } respond(result)
   }
+
+  /**
+   * Writes messages to a connection
+   * @param message
+   */
+  def write(message: String) {
+    connection ! Write(ByteString(message))
+  }
+
   /**
    * Convert given data and send it to user
    * @param response
    */
   def respond(response: RowData) {
-    connection ! Write(ByteString(response("data").asInstanceOf[String] + "\n"))
+    write(response("data").asInstanceOf[String] + "\n")
   }
 }

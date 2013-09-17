@@ -2,7 +2,7 @@ package db
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import com.github.mauricio.async.db.{ QueryResult, ResultSet }
+import com.github.mauricio.async.db.{RowData, QueryResult}
 
 trait DB {
   val pool = Pool.pool
@@ -23,7 +23,7 @@ trait DB {
    * and passes it to the connection pool with given values.
    * @return ResultSet of the query
    */
-  def fetch(query: String, values: Any*): Future[Option[ResultSet]] =
+  def fetch(query: String, values: Any*): Future[Option[Seq[RowData]]] =
     execute(query, values).map(_.rows)
 
 }

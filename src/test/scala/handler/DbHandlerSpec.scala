@@ -2,10 +2,11 @@ package handler
 
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{ BeforeAndAfterAll, WordSpec }
-import akka.actor.{Props, ActorRef, ActorSystem}
+import org.scalatest.concurrent.Eventually._
+import org.scalatest.{BeforeAndAfterAll, WordSpec}
+import akka.actor.{Props, ActorSystem}
 import akka.testkit.{TestActorRef, ImplicitSender, TestKit}
-import com.github.mauricio.async.db.QueryResult
+import com.github.mauricio.async.db.{RowData, QueryResult}
 import concurrent.Future
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -15,12 +16,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class DbHandlerSpec(_system: ActorSystem)
-    extends TestKit(_system)
-    with ImplicitSender
-    with WordSpec
-    with MustMatchers
-    with BeforeAndAfterAll
-    with MockitoSugar {
+  extends TestKit(_system)
+  with ImplicitSender
+  with WordSpec
+  with MustMatchers
+  with BeforeAndAfterAll
+  with MockitoSugar {
 
   def this() = this(ActorSystem("DbHandlerSpec"))
 
@@ -33,7 +34,9 @@ class DbHandlerSpec(_system: ActorSystem)
     val handler = testActorRef.underlyingActor
     val spyHandler = spy(handler)
     val mockInput = "mockInput"
-    val mockQueryResultFuture = Future{mock[QueryResult]}
+    val mockQueryResultFuture = Future {
+      mock[QueryResult]
+    }
 
     doReturn(mockQueryResultFuture).when(spyHandler).execute(anyString(), anyString())
     doNothing().when(spyHandler).printAll()
@@ -52,6 +55,31 @@ class DbHandlerSpec(_system: ActorSystem)
       verify(spyHandler, times(1)).printAll()
     }
   }
+
+  "DbHandler.printAll" must {
+    val testActorRef = TestActorRef[DbHandler](Props(new DbHandler(testActor)))
+    val handler = testActorRef.underlyingActor
+    val spyHandler = spy(handler)
+
+    val mockResultSet = List(mock[RowData], mock[RowData]).toSeq
+
+    val mockResultSetResponse = Future {
+      Option(mockResultSet)
+    }
+
+    doReturn(mockResultSetResponse).when(spyHandler).fetch(anyString(), any())
+    doNothing().when(spyHandler).respond(any[RowData])
+    doNothing().when(spyHandler).write(anyString())
+
+    "call respond on resultSet.flatMap" in {
+      spyHandler.printAll()
+      eventually {
+        verify(spyHandler, times(mockResultSet.size)).respond(any[RowData])
+        mockResultSet.foreach{
+          mockRowData =>
+            verify(spyHandler, times(1)).respond(Matchers.eq(mockRowData))
+        }
+      }
+    }
+  }
 }
-
-
