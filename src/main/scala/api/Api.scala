@@ -2,17 +2,31 @@ package api
 
 import spray.client.pipelining._
 import spray.http._
-import spray.http.HttpRequest
 import akka.actor.ActorSystem
 import spray.http.ContentType.apply
 import spray.http.Uri.apply
 import HttpMethods._
+import spray.http.HttpRequest
+import spray.http.HttpMethod
 
-object Api {
+object Api extends Api
+
+class Api {
 
   implicit val system = ActorSystem("api-spray-client")
 
   import system.dispatcher
+
+  //To be able to mock
+  def sendAndReceive = sendReceive
+
+  def createHttpRequest(uri: String,
+    method: HttpMethod,
+    data: String) =
+
+    HttpRequest(method = method,
+      uri = uri,
+      entity = HttpEntity(data))
 
   /**
    * Makes HTTP request
@@ -21,14 +35,12 @@ object Api {
    * @param method
    * @return
    */
-  def httpRequest(method: HttpMethod = GET,
-    uri: String,
+  def httpRequest(uri: String,
+    method: HttpMethod = GET,
     data: String = "") = {
-    val pipeline = sendReceive
+    val pipeline = sendAndReceive
     pipeline {
-      HttpRequest(method = method,
-        uri = uri,
-        entity = HttpEntity(data))
+      createHttpRequest(uri, method, data)
     }
   }
 }
