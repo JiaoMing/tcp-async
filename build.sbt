@@ -22,7 +22,8 @@ libraryDependencies ++= Seq(
   "io.spray" % "spray-util" % "1.2-20130912",
   "io.spray" % "spray-client" % "1.2-20130912",
   "io.spray" % "spray-testkit" % "1.2-20130912",
-  "io.spray" % "spray-routing" % "1.2-20130912"
+  "io.spray" % "spray-routing" % "1.2-20130912",
+  "org.mockito" % "mockito-all" % "1.9.5" % "test"
 )
 
 seq(ScctPlugin.instrumentSettings : _*)
