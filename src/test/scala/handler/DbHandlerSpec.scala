@@ -89,4 +89,22 @@ class DbHandlerSpec(_system: ActorSystem)
       }
     }
   }
+
+  "DbHandler.getData" must {
+    val testActorRef = TestActorRef[DbHandler](Props(new DbHandler(testActor)))
+    val handler = testActorRef.underlyingActor
+
+    val spyHandler = spy(handler)
+    val mockRowData = mock[RowData]
+    val mockData = "mockStringData"
+    val mockDataNoCast = mockData.asInstanceOf[Any]
+
+    doReturn(mockDataNoCast).when(mockRowData).apply(anyString())
+
+    spyHandler.getData(mockRowData) must be (mockData)
+
+    "get \"data\" field of row data" in {
+      verify(mockRowData).apply(Matchers.eq("data"))
+    }
+  }
 }
