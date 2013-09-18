@@ -26,27 +26,24 @@ class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
    * Prints all data in db to user
    */
   def printAll() {
-    write("values in db are: \n")
+    respond("values in db are:")
     for {
       queryResult <- fetch("SELECT * FROM demo")
       resultSet <- queryResult
-      result <- resultSet
+      rowData <- resultSet
+      result = getData(rowData)
     } respond(result)
   }
 
   /**
-   * Writes messages to a connection
-   * @param message
+   * Convert given data and send it to user
+   * @param response: String
    */
-  def write(message: String) {
-    connection ! Write(ByteString(message))
+  def respond(response: String) {
+    connection ! Write(ByteString(response + "\n"))
   }
 
-  /**
-   * Convert given data and send it to user
-   * @param response
-   */
-  def respond(response: RowData) {
-    write(response("data").asInstanceOf[String] + "\n")
+  def getData(rowData: RowData) = {
+    rowData("data").asInstanceOf[String]
   }
 }

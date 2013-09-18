@@ -14,7 +14,6 @@ import org.mockito.{ArgumentMatcher, Matchers}
 import collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
 class DbHandlerSpec(_system: ActorSystem)
   extends TestKit(_system)
   with ImplicitSender
@@ -59,26 +58,34 @@ class DbHandlerSpec(_system: ActorSystem)
   "DbHandler.printAll" must {
     val testActorRef = TestActorRef[DbHandler](Props(new DbHandler(testActor)))
     val handler = testActorRef.underlyingActor
+
     val spyHandler = spy(handler)
-
-    val mockResultSet = List(mock[RowData], mock[RowData]).toSeq
-
+    val mockRowData1 = mock[RowData]
+    val mockRowData2 = mock[RowData]
+    val mockResultSet = List(mockRowData1, mockRowData2)
+    val mockData1 = "mockData1"
+    val mockData2 = "mockData2"
     val mockResultSetResponse = Future {
       Option(mockResultSet)
     }
 
     doReturn(mockResultSetResponse).when(spyHandler).fetch(anyString(), any())
-    doNothing().when(spyHandler).respond(any[RowData])
-    doNothing().when(spyHandler).write(anyString())
+    doReturn(mockData1).when(spyHandler).getData(Matchers.eq(mockRowData1))
+    doReturn(mockData2).when(spyHandler).getData(Matchers.eq(mockRowData2))
 
+    spyHandler.printAll()
     "call respond on resultSet.flatMap" in {
-      spyHandler.printAll()
       eventually {
-        verify(spyHandler, times(mockResultSet.size)).respond(any[RowData])
-        mockResultSet.foreach{
-          mockRowData =>
-            verify(spyHandler, times(1)).respond(Matchers.eq(mockRowData))
-        }
+        verify(spyHandler, atLeast(2)).respond(anyString())
+        verify(spyHandler, times(1)).respond(Matchers.eq(mockData1))
+        verify(spyHandler, times(1)).respond(Matchers.eq(mockData2))
+      }
+    }
+    "parse each rowData" in {
+      eventually {
+        verify(spyHandler, times(2)).getData(any[RowData])
+        verify(spyHandler, (times(1))).getData(Matchers.eq(mockRowData1))
+        verify(spyHandler, (times(1))).getData(Matchers.eq(mockRowData2))
       }
     }
   }
