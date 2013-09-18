@@ -40,7 +40,7 @@ class Api {
     data: String = "") = {
     val pipeline = sendAndReceive
     pipeline {
-      createHttpRequest(uri,method,data)
+      createHttpRequest(uri, method, data)
     }
   }
 }
