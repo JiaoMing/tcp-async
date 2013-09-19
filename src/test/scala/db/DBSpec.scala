@@ -16,7 +16,6 @@ class DBSpec extends WordSpec
 
   val mockPool = mock[ConnectionPool[Connection]]
   class Database extends DB
-  val spyDB = spy(new Database)
 
   val query = "DEMO (?,?)"
   val inputParam1 = "input1"
@@ -24,7 +23,6 @@ class DBSpec extends WordSpec
 
   "A DB execute" must {
     val mockQueryResultFuture = mock[Future[QueryResult]]
-    class Database extends DB
     val spyDB = spy(new Database)
 
     doReturn(mockPool).when(spyDB).pool
@@ -45,6 +43,9 @@ class DBSpec extends WordSpec
 
   "A DB fetch" must {
     val mockRowDataSeqFuture = mock[Future[Option[Seq[RowData]]]]
+    val spyDB = spy(new Database)
+
+    doReturn(mockPool).when(spyDB).pool
 
     "executes \"execute\" given query and parameters " in {
       doReturn(mockRowDataSeqFuture).when(spyDB).execute(Matchers.anyString(), Matchers.any())
