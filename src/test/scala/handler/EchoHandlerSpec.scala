@@ -52,6 +52,20 @@ class EchoHandlerSpec(_system: ActorSystem)
       expectTerminated(handler)
     }
 
+    "close itself if confirmed closed" in {
+      val handler = system.actorOf(EchoHandlerProps.props(testActor))
+      watch(handler)
+      handler ! ConfirmedClosed
+      expectTerminated(handler)
+    }
+
+    "close itself if aborted" in {
+      val handler = system.actorOf(EchoHandlerProps.props(testActor))
+      watch(handler)
+      handler ! Aborted
+      expectTerminated(handler)
+    }
+
   }
 
 }
