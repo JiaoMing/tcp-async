@@ -9,11 +9,11 @@ import akka.util.ByteString
 import akka.io.Tcp.Received
 
 class EchoHandlerSpec(_system: ActorSystem)
-    extends TestKit(_system)
-    with ImplicitSender
-    with WordSpec
-    with MustMatchers
-    with BeforeAndAfterAll {
+  extends TestKit(_system)
+  with ImplicitSender
+  with WordSpec
+  with MustMatchers
+  with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("EchoHandlerSpec"))
 

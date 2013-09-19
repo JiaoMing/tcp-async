@@ -30,17 +30,17 @@ class ApiSpec extends WordSpec
         get {
           complete(getJson)
         } ~
-        post {
-          complete(postJson)
-        }
+          post {
+            complete(postJson)
+          }
       } ~
-      path("datatest") {
-        post {
-          entity(as[String]) {
-            data => complete(data)
+        path("datatest") {
+          post {
+            entity(as[String]) {
+              data => complete(data)
+            }
           }
         }
-      }
 
     "create HttpRequest that queries the given url using get method by default" in {
       Api.createHttpRequest("/test", GET, "") ~> testRoute ~> check {

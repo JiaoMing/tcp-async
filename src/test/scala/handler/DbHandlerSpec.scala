@@ -3,14 +3,14 @@ package handler
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.{BeforeAndAfterAll, WordSpec}
-import akka.actor.{Props, ActorSystem}
-import akka.testkit.{TestActorRef, ImplicitSender, TestKit}
-import com.github.mauricio.async.db.{RowData, QueryResult}
+import org.scalatest.{ BeforeAndAfterAll, WordSpec }
+import akka.actor.{ Props, ActorSystem }
+import akka.testkit.{ TestActorRef, ImplicitSender, TestKit }
+import com.github.mauricio.async.db.{ RowData, QueryResult }
 import concurrent.Future
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.mockito.{ArgumentMatcher, Matchers}
+import org.mockito.{ ArgumentMatcher, Matchers }
 import collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -101,7 +101,7 @@ class DbHandlerSpec(_system: ActorSystem)
 
     doReturn(mockDataNoCast).when(mockRowData).apply(anyString())
 
-    spyHandler.getData(mockRowData) must be (mockData)
+    spyHandler.getData(mockRowData) must be(mockData)
 
     "get \"data\" field of row data" in {
       verify(mockRowData).apply(Matchers.eq("data"))

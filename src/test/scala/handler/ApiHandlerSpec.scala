@@ -10,11 +10,11 @@ import akka.io.Tcp.Received
 import scala.concurrent.duration._
 
 class ApiHandlerSpec(_system: ActorSystem)
-    extends TestKit(_system)
-    with ImplicitSender
-    with WordSpec
-    with MustMatchers
-    with BeforeAndAfterAll {
+  extends TestKit(_system)
+  with ImplicitSender
+  with WordSpec
+  with MustMatchers
+  with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("ApiHandlerSpec"))
 

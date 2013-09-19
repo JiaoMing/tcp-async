@@ -11,11 +11,11 @@ import akka.testkit.ImplicitSender
 import handler.EchoHandlerProps
 
 class TcpServerSpec(_system: ActorSystem)
-    extends TestKit(_system)
-    with ImplicitSender
-    with WordSpec
-    with MustMatchers
-    with BeforeAndAfterAll {
+  extends TestKit(_system)
+  with ImplicitSender
+  with WordSpec
+  with MustMatchers
+  with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("TcpServerSpec"))
 
