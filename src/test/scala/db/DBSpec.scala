@@ -1,0 +1,48 @@
+package db
+
+import org.scalatest.WordSpec
+import org.scalatest.matchers.MustMatchers
+import org.scalatest.mock.MockitoSugar
+import com.github.mauricio.async.db.pool.ConnectionPool
+import org.mockito.Mockito._
+import org.mockito.{Matchers, Mockito}
+import com.github.mauricio.async.db.{Connection, QueryResult}
+import scala.concurrent.Future
+
+class DBSpec extends WordSpec
+with MustMatchers
+with MockitoSugar {
+
+  val mockPool = mock[ConnectionPool[Connection]]
+  class Database extends DB
+  val spyDB = spy(new Database)
+
+  val query = "DEMO (?,?)"
+  val inputParam1 = "input1"
+  val inputParam2 = "input2"
+
+  "A DB execute" must {
+    val mockQueryResultFuture = mock[Future[QueryResult]]
+    class Database extends DB
+    val spyDB = spy(new Database)
+
+    doReturn(mockPool).when(spyDB).pool
+
+    "executes \"sendPreparedStatement\" given query and parameters" in {
+      doReturn(mockQueryResultFuture).when(mockPool).sendPreparedStatement(Matchers.anyString(),Matchers.any())
+
+      spyDB.execute(query,inputParam1, inputParam2)
+
+      Mockito.verify(mockPool).sendPreparedStatement(Matchers.eq(query),Matchers.eq(Array(inputParam1, inputParam2)))
+    }
+
+    "executes \"sendQuery\" given query and parameters" in {
+      doReturn(mockQueryResultFuture).when(mockPool).sendQuery(Matchers.anyString())
+
+      spyDB.execute(query)
+
+      Mockito.verify(mockPool).sendQuery(Matchers.eq(query))
+    }
+
+  }
+}
