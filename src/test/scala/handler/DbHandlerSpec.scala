@@ -9,6 +9,7 @@ import akka.testkit.{ TestActorRef, ImplicitSender, TestKit }
 import com.github.mauricio.async.db.{ RowData, QueryResult }
 import concurrent.Future
 import org.mockito.Matchers._
+import org.mockito.Matchers.{eq => equalTo}
 import org.mockito.Mockito._
 import org.mockito.{ ArgumentMatcher, Matchers }
 import collection.mutable
@@ -48,7 +49,7 @@ class DbHandlerSpec(_system: ActorSystem)
           array.size == 1 && array(0).isInstanceOf[String] && array(0).asInstanceOf[String].startsWith(mockInput + "--")
         }
       }
-      verify(spyHandler, times(1)).execute(Matchers.eq("INSERT INTO demo VALUES (?)"), argThat(new executeInputMatcher))
+      verify(spyHandler, times(1)).execute(equalTo("INSERT INTO demo VALUES (?)"), argThat(new executeInputMatcher))
     }
     "call printall in the end" in {
       verify(spyHandler, times(1)).printAll()
@@ -70,22 +71,22 @@ class DbHandlerSpec(_system: ActorSystem)
     }
 
     doReturn(mockResultSetResponse).when(spyHandler).fetch(anyString(), any())
-    doReturn(mockData1).when(spyHandler).getData(Matchers.eq(mockRowData1))
-    doReturn(mockData2).when(spyHandler).getData(Matchers.eq(mockRowData2))
+    doReturn(mockData1).when(spyHandler).getData(equalTo(mockRowData1))
+    doReturn(mockData2).when(spyHandler).getData(equalTo(mockRowData2))
 
     spyHandler.printAll()
     "call respond on resultSet.flatMap" in {
       eventually {
         verify(spyHandler, atLeast(2)).respond(anyString())
-        verify(spyHandler, times(1)).respond(Matchers.eq(mockData1))
-        verify(spyHandler, times(1)).respond(Matchers.eq(mockData2))
+        verify(spyHandler, times(1)).respond(equalTo(mockData1))
+        verify(spyHandler, times(1)).respond(equalTo(mockData2))
       }
     }
     "parse each rowData" in {
       eventually {
         verify(spyHandler, times(2)).getData(any[RowData])
-        verify(spyHandler, (times(1))).getData(Matchers.eq(mockRowData1))
-        verify(spyHandler, (times(1))).getData(Matchers.eq(mockRowData2))
+        verify(spyHandler, (times(1))).getData(equalTo(mockRowData1))
+        verify(spyHandler, (times(1))).getData(equalTo(mockRowData2))
       }
     }
   }
@@ -104,7 +105,7 @@ class DbHandlerSpec(_system: ActorSystem)
     spyHandler.getData(mockRowData) must be(mockData)
 
     "get \"data\" field of row data" in {
-      verify(mockRowData).apply(Matchers.eq("data"))
+      verify(mockRowData).apply(equalTo("data"))
     }
   }
 }
