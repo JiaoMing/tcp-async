@@ -22,19 +22,16 @@ class DBSpec extends WordSpec
   val inputParam2 = "input2"
 
   "A DB execute" must {
-    val mockQueryResultFuture = mock[Future[QueryResult]]
     val spyDB = spy(new Database)
 
     doReturn(mockPool).when(spyDB).pool
 
     "executes \"sendPreparedStatement\" given query and parameters" in {
-      doReturn(mockQueryResultFuture).when(mockPool).sendPreparedStatement(Matchers.anyString(), Matchers.any())
       spyDB.execute(query, inputParam1, inputParam2)
       Mockito.verify(mockPool).sendPreparedStatement(Matchers.eq(query), Matchers.eq(Array(inputParam1, inputParam2)))
     }
 
     "executes \"sendQuery\" given query and parameters" in {
-      doReturn(mockQueryResultFuture).when(mockPool).sendQuery(Matchers.anyString())
       spyDB.execute(query)
       Mockito.verify(mockPool).sendQuery(Matchers.eq(query))
     }
@@ -51,13 +48,13 @@ class DBSpec extends WordSpec
       doReturn(mockRowDataSeqFuture).when(spyDB).execute(Matchers.anyString(), Matchers.any())
       spyDB.fetch(query, inputParam1, inputParam2)
 
-      class ExecuteInputMatcher extends ArgumentMatcher[mutable.WrappedArray[Any]] {
+      val executeInputMatcher = new ArgumentMatcher[mutable.WrappedArray[Any]] {
         def matches(argument: Any) = {
           val array = argument.asInstanceOf[mutable.WrappedArray[Any]].array
           array.size == 2 && array(0).equals(inputParam1) && array(1).equals(inputParam2)
         }
       }
-      Mockito.verify(spyDB).execute(Matchers.eq(query), Matchers.argThat(new ExecuteInputMatcher))
+      Mockito.verify(spyDB).execute(Matchers.eq(query), Matchers.argThat(executeInputMatcher))
     }
 
   }
