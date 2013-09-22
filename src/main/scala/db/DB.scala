@@ -21,7 +21,7 @@ trait DB {
   /**
    * Creates a prepared statement with the given query
    * and passes it to the connection pool with given values.
-   * @return ResultSet of the query
+   * @return Seq[RowData] of the query
    */
   def fetch(query: String, values: Any*): Future[Option[Seq[RowData]]] =
     execute(query, values: _*).map(_.rows)

@@ -7,18 +7,17 @@ object Conf {
   val config = ConfigFactory.load
   config.checkValid(ConfigFactory.defaultReference)
 
-  val dbUsername = config.getString("db.username")
-  val dbPassword = config.getString("db.password")
-  val dbPort = config.getInt("db.port")
-  val dbName = config.getString("db.name")
+  val appHostName = config.getString("tcp-async.app.hostname")
+  val appPort = config.getInt("tcp-async.app.port")
 
-  val dbPoolMaxObjects = config.getInt("db.pool.maxObjects")
-  val dbPoolMaxIdle = config.getInt("db.pool.maxIdle")
-  val dbPoolMaxQueueSize = config.getInt("db.pool.maxQueueSize")
+  val apiUrl = config.getString("tcp-async.api.url")
 
-  val apiUrl = config.getString("api.url")
+  val dbUsername = config.getString("tcp-async.db.username")
+  val dbPassword = config.getString("tcp-async.db.password")
+  val dbPort = config.getInt("tcp-async.db.port")
+  val dbName = config.getString("tcp-async.db.name")
 
-  val appHostName = config.getString("app.hostname")
-  val appPort = config.getInt("app.port")
-
+  val dbPoolMaxObjects = config.getInt("tcp-async.db.pool.maxObjects")
+  val dbPoolMaxIdle = config.getInt("tcp-async.db.pool.maxIdle")
+  val dbPoolMaxQueueSize = config.getInt("tcp-async.db.pool.maxQueueSize")
 }
