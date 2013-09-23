@@ -38,6 +38,13 @@ class EchoHandlerSpec(_system: ActorSystem)
       expectMsg(Close)
     }
 
+    "close itself if ErrorClosed is received" in {
+      val handler = system.actorOf(EchoHandlerProps.props(testActor))
+      watch(handler)
+      handler ! ErrorClosed
+      expectTerminated(handler)
+    }
+
     "close itself if Closed is received" in {
       val handler = system.actorOf(EchoHandlerProps.props(testActor))
       watch(handler)
