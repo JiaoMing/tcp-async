@@ -6,371 +6,418 @@
 
 <div>
     <h2> Introduction </h2>
+
     <p>
-        tcp-async, as the name implies, handles TCP connections reactively using 
-        <a href="http://www.akka.io">Akka I/O</a>.
-    </p>
-    <p> 
-        Thanks to akka-io, <code>tcp-async</code> can serve high amount of requests concurrently. Whole application is designed to be reactive top to bottom.
+        <b>tcp-async</b>, as the name implies, handles TCP connections reactively using
+        <a href="http://www.akka.io" target="_blank">Akka I/O</a>. It also makes reactive API calls using
+        <a href="http://spray.io/documentation/1.2-M8/spray-client/">spray-client</a>, and non-blocking SQL DB
+        operations
+        using <a href="https://github.com/mauricio/postgresql-async">postgresql/mysql-async</a>.
     </p>
 
     <p>
-        We've created a few options for handling requests. Writing incoming data to a MySQL database, making an API call,
-        and an Echo Server for the simplest. 
-        For those handlers we've used some open source libraries which will be mentioned later.
+        Thanks to akka-io, <code>tcp-async</code> can serve high amount of requests concurrently.
+        Whole application is designed to be reactive top to bottom.
     </p>
 
+    <p>
+        A few options for handling requests is already created for you. Basic echo handler is the simplest, but there
+        are other handlers as well; writing incoming data to a MySQL database, and making an API call.
+    </p>
+
+    <p>
+        All those handlers are reactive, and based on some open source libraries which will be mentioned later.
+    </p>
+
+    <p>
+        Lets start with the server now.
+    </p>
     <img src="tutorial/tcp-async.png" style="width:400px">
 </div>
 
 <div>
-    <h2>Configuration</h2>
-
-    <p> Every configuration data stands in 
-        <a href="#code/src/main/resources/application.conf" class="shortcut">application.conf</a>.
-        This helps us to keep all configurations together.
-    </p>
-
-    <p> 
-        When the application starts, configuration is loaded to a
-        <a href="#code/src/main/scala/util/Conf.scala" class="shortcut">Conf</a> object. 
-        Application uses this object when needed instead of reading <code>.conf</code> file every time.
-
-<pre><code>
-    val uri = Conf.apiUrl + data.utf8String.trim
-    // Instead of:
-    // val config = ConfigFactory.load
-    // config.checkValid(ConfigFactory.defaultReference)
-    // val uri = config.getString("api.url") + data.utf8String.trim
-</code></pre>
-
-        For more information, please see 
-        <a href="https://github.com/typesafehub/config">typesafe config</a>. 
-    </p>
-
-    <h3>Database Configuration:</h3>
-    <p>TODO</p>
-    <h3>API Configuration:</h3>
-    <p>TODO</p>
-    <h3>Server Configuration:</h3>
-    <p>TODO</p>
-</div>
-
-<div>
-    <h2> First Things First: Main </h2>
-    <p>
-        The entrance of our application contain two lines of code.
-        First, an <a href="http://doc.akka.io/docs/akka/2.0/general/actor-systems.html">Actor System</a> definition:
-<pre><code>
-    val system = ActorSystem("server")
-</code></pre>
-    </p>
-
-    <p>
-        And a Server actor definition which is our next subject:
-<pre><code>
-    val service = system.actorOf(TcpServer.props(EchoHandlerProps), "ServerActor")
-</code></pre>
-    </p>
-
-    <p>
-        Server actor instance takes a
-        <a href="#code/src/main/scala/handler/Handler.scala">HandlerProps</a> 
-        parameter in order to change the behavior of the server.
-    </p>
-
-    <p> 
-        <code>tcp-async</code> provides three sample Handlers: 
-        <br />
-        <a href="#code/src/main/scala/handler/EchoHandler.scala" class="shortcut">EchoHandler</a>
-        <br />
-        <a href="#code/src/main/scala/handler/DbHandler.scala" class="shortcut">DbHandler</a>
-        <br />
-        <a href="#code/src/main/scala/handler/ApiHandler.scala" class="shortcut">ApiHandler</a>
-    </p>
-
-
-</div>
-
-<div>
     <h2> Waiting For Clients: Server</h2>
-    <p> 
+
+    <p>
         <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
-        is an actor waiting for connections which can be made over HTTP, TCP or UDP. You should implement a Server actor for the type you wish to use.
-        <code>tcp-async</code> comes with a built in <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a>.
+        is an actor waiting for connections which can be made over HTTP, TCP or UDP. You should implement a Server actor
+        for the type you wish to use. <code>tcp-async</code> comes with a built in
+        <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a>.
     </p>
 
     <p>
-        Eeach <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
+        Each <a href="#code/src/main/scala/server/Server.scala" class="shortcut">Server</a>
         actor binds to an InetSocketAdress. In this case,
         <a href="#code/src/main/scala/server/TcpServer.scala" class="shortcut">TcpServer</a>
         listens for incoming Tcp connections with the following binding:
-<pre><code>
-    IO(Tcp) ! Bind(self, new InetSocketAddress(Conf.appHostName, Conf.appPort))
-</code></pre>
     </p>
+
+    <pre><code>IO(Tcp) ! Tcp.Bind(self, new InetSocketAddress(appHostName, appPort))</code></pre>
 
     <p>
         Just below that, you can see <code>receive</code> function:
     </p>
 
-<pre><code>
-    override def receive = {
-        case CommandFailed(_: Bind) => context stop self
+<pre><code>override def receive = {
+    case CommandFailed(_: Bind) => context stop self
 
-        case Connected(remote, local) =>
-          val handler = context.actorOf(handlerProps.props(sender))
-          sender ! Register(handler)
-    }
+    case Connected(remote, local) =>
+    val handler = context.actorOf(handlerProps.props(sender))
+    sender ! Register(handler)
+}
 </code></pre>
 
     <p>
-        <!-- TODO:düzeltilecek -->
-        <code>receive</code> creates a new
-        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> 
-        and registers it to sender. Which means server creates a connection with sender.
-        But the key part here is that connection with sender(client) is not managed by server itself.
+        When an actor is bound to an InetSocketAddress, it either receives a CommandFailed or a Connected message.
+        <code>CommandFailed</code> message is sent if there was an error binding to the given InetSocketAddress.
+        <code>Connected</code> message is sent whenever there is a client requesting for a connection. Every connection
+        must have its own <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> to process
+        incoming data without blocking the server. This is done by creating a new handler actor and registering that
+        handler to the current connection by sending a <code>Register</code> message.
+    </p>
+
+    <p>
+        The key part here is that connection with sender(client) is not managed by Server actor itself.
         Every connection is handled by a Handler actor instance.
-        That means Server actor doesn't need to deal with them. 
-        Thus there is no impediment about connection count. According to load tests we have made, 
-        10K requests can be easily handled by tcp-async.
+        Thus the Server actor is free to get new connections, and indeed, a simple load test shows that 10K requests can
+        be easily handled by tcp-async.
     </p>
 
     <p><i>
         Remember, 10K actors doesn't mean 10K threads.
-    </i></p> 
+    </i></p>
 
     <p>
-        You must define which Handler you wish to use while creating the server.
-<pre><code>
-    val service = system.actorOf(TcpServer.props(EchoHandlerProps), "ServerActor")
-</code></pre>
+        Now lets move on to Handlers.
     </p>
-
-    <p>
-        Handlers will be described next.
-    </p> 
 </div>
 
 <div>
     <h2>Deciding What To Do: Handler</h2>
+
     <p>
-        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> is an Actor which 
-        decides what to do with incoming requests. 
+        <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> is an Actor which
+        deals with the client connection and decides what to do with incoming requests.
     </p>
-    
+
     <p>
-<pre><code>
-    def receive: Receive = {
-        case Received(data) =>
-          data.utf8String.trim match {
-            case str => received(str)
-            // ...
-          }
-    }
+        Handler takes sender actor as a parameter. Communication with the remote client is performed using this actor.
+<pre><code>abstract class Handler(val connection: ActorRef) extends Actor {
     // ...
-</code></pre>
+}</code></pre>
     </p>
 
     <p>
-        Concrete handlers should implement the 
-        <code>received</code> function which describes what kind of messages it can handle 
-        along with the implementation of how the messages should be processed.
-<pre><code>
-    def received(str: String): Unit
-</code></pre>
+        Looking further into the code, you will see that there are six different messages that can be consumed, five of
+        which is actually related to the way the connection is closed, and last one is about the incoming data. Quickly
+        summarizing the first five,
+    </p>
+<pre>
+    PeerClosed      => Closed from remote endpoint
+    ErrorClosed     => Closed because of an error
+    Closed          => Closed as a response to Close message
+    ConfirmedClosed => Closed as a response to ConfirmedClose message
+    Aborted         => Closed as a response to Abort message
+</pre>
+
+    <p>
+        You can read more details about the ways to close a Tcp connection and further explanation of each message from
+        <a href="http://doc.akka.io/docs/akka/2.2.1/scala/io-tcp.html#closing-connections" target="_blank">here</a>.
     </p>
 
     <p>
-        Incoming data type is ByteString and contains a newline character at the end. Thats why we convert and trim it before use:
-<pre><code>
-val convertedData = data.utf8String.trim
-</code></pre>
-    </p>
-
-    <p>
-        Handler takes sender actor as a parameter. Communication with the remote client is performed using this ActorRef.
-<pre><code>
-    abstract class Handler(val connection: ActorRef) extends Actor{
-    // ...
+        Continuing with the more exciting part of handling incoming data, we should check for the <code>Received</code>
+        message. Received message contains a ByteString as you might expect, and its up to the handler to give that
+        ByteString a meaning. Here for the purposes of this tutorial we decode the ByteString into String using UTF-8,
+        trim any whitespaces and call <code>received</code> function with it. Here is how its done,
+<pre><code>def receive: Receive = {
+  case Received(data) =>
+    data.utf8String.trim match {
+      // ...
+      case str => received(str)
     }
-</code></pre>
-
-
+  // ...
+}</code></pre>
     </p>
 
+    <p>
+        Concrete handler classes should implement the <code>received</code> function, processing the incoming data as
+        they please. Lets see a simple example, an echoing handler.
+    </p>
 </div>
 
 <div>
     <h2>Repeat After Me: EchoHandler</h2>
+
     <p>
         <a href="#code/src/main/scala/handler/EchoHandler.scala" class="shortcut">EchoHandler</a>,
         as you can guess, echoes incoming message.
-
-<pre><code>
-    def received(data: String) = connection ! Write(ByteString(data + "\n"))
-</code></pre>
     </p>
-</div>
-
-<div>
-    <h2>Remember, Remember: DbHandler</h2>
     <p>
-        <a href="#code/src/main/scala/handler/DbHandler.scala" class="shortcut">DbHandler</a>
-        writes incoming message to a MySQL database and returns all the data in database to sender.
+        This is achieved by sending a Write message to the connection actor. Write message requires a ByteString to be
+        sent over the connection, and as an EchoHandler, incoming data is given as the ByteString.
     </p>
 
-    <p><b>Note: In order to use DbHandler, you must have a MySQL Database and valid
-        database configuration for it.
-    </b></p>
+    <pre><code>def received(data: String) = connection ! Write(ByteString(data + "\n"))</code></pre>
 
     <p>
-        As in EchoHandler, incoming data type is ByteString. Also response must be ByteString too.
-
-<pre><code>
-    connection ! Write(ByteString("data to return"))
-</code></pre>
-
+        Since abstract <a href="#code/src/main/scala/handler/Handler.scala" class="shortcut">Handler</a> does bulk of
+        the task for us, EchoHandler is plain simple.
     </p>
 
-    <p>
-        We used
-        <a href="https://github.com/mauricio/postgresql-async">postgresql/mysql-async</a>
-        as MySql driver.
-    </p>
-
-    <h3>postgresql/mysql-async</h3>
+    <h3>Running EchoHandler</h3>
 
     <p>
-        <code>postgresql/mysql-async</code> is an async, Netty based database driver for MySQL and PostgreSQL written in Scala.
+        Hey, you should be wondering how you can run and test EchoHandler now. Don't worry its already done for you.
+        Go ahead and check <a href="#code/src/main/scala/Main.scala" class="shortcut">MainWithEchoHandler</a>, you will
+        see that it simply creates an
+        <a href="http://doc.akka.io/docs/akka/2.2.1/general/actor-systems.html" target="_blank">ActorSystem</a> for
+        Server and Handler actors to live within, then it fires up a TcpServer actor, giving in
+        <a href="#code/src/main/scala/handler/EchoHandler.scala" class="shortcut">EchoHandlerProps</a> as a parameter.
+        You may run this MainWithEchoHandler now, just go to <a href="#run" class="shortcut">Run</a>, and make sure you
+        pick the correct main class from the list.
     </p>
 
     <p>
-        In 
-        <a href="#code/src/main/scala/db" class="shortcut">db</a>
-        folder, you can see two object definitions which are required for db actions.
+        Once, its up and running, all you have to do is to connect and send some data in. Here is an example session
+        using <code>telnet</code>:
+    </p>
+
+<pre>#Connect on default host and port
+telnet localhost 9999
+telnet> Hello World!
+Hello World!
+telnet> close
+Connection closed by foreign host.</pre>
+
+    <p>
+        You should try it on your own now. Keep in mind that you can have as many connections as you wish, try opening
+        up more than one telnet sessions. You may also want to try different keywords for closing (Abort, Close,
+        ConfirmedClose). Come back once you are done!
     </p>
 
     <p>
-        <a href="#code/src/main/scala/db/Pool.scala" class="shortcut">Pool</a>
-        defines a connection pool for using database and keeps certain amount of connections which are always ready to use. When you execute a query, if there is an avaliable connection, query is executed on Db. If not, query is pushed into queue. If queue is full(queue size defined in 
-        <a href="#code/src/main/resources/application.conf" class="shortcut">application.conf</a>)
-        throws <code>PoolExhaustedException</code>. Connections are returned back to pool after execution is
-        done.
+        Lets move on to a more complex example, shall we?
     </p>
-
-    <p>
-        <a href="#code/src/main/scala/db/DB.scala" class="shortcut">DB</a>
-        is used to execute queries.
-
-    </p>
-
-    <p>
-<pre><code>
-    def execute(query: String, values: Any*): Future[QueryResult] = {
-        if ( values.size > 0 )
-            pool.sendPreparedStatement(query, values)
-        else
-            pool.sendQuery(query)
-    }
-</code></pre>
-         
-         If <code>values</code> parameter isn't defined, query is executed as raw query. This means, no parameter binding, no prepared statement. Otherwise query is assumed as prepared statement and executed with given values.
-    </p>
-
-    <p> 
-        If you only need <code>ResultSet</code>, you can use <code>fetch</code>:
-<pre><code>
-    def fetch(query: String, values: Any*): Future[Option[ResultSet]] =
-        execute(query, values).map(_.rows)
-</code></pre>
-    </p>
-
-    <p>
-        Example of fetching data from database is given below:
-
-<pre><code>
-    for {
-      queryResult <- DB.fetch("YourQuery")
-      resultSet <- queryResult
-      result <- resultSet
-    } yield result
-</code></pre>
-    </p>
-
 </div>
 
 <div>
     <h2>Ground Control To Major Tom: ApiHandler</h2>
 
     <p>
-        <a href="#code/src/main/scala/handler/ApiHandler.scala" class="shortcut">ApiHandler</a> 
-        makes Api calls to 
+        <a href="#code/src/main/scala/handler/ApiHandler.scala" class="shortcut">ApiHandler</a>
+        makes Api calls to
         <a href="https://developers.google.com/maps/documentation/elevation/">Google Elevation Api</a>.
-        Google elevation api simply returns the elevation of given coordinates. To try it:
-
-<pre><code>
-    // Tcp connection:
-    telnet localhost 9999
-
-    // request
-    //41.020254,28.889898
-
-    // response
-    // {
-    //    "results" : [
-    //       {
-    //          "elevation" : 74.11408233642578,
-    //          "location" : {
-    //             "lat" : 41.020254,
-    //             "lng" : 28.889898
-    //          },
-    //          "resolution" : 610.8129272460938
-    //       }
-    //    ],
-    //    "status" : "OK"
-    // }
-</code></pre>
+        Google elevation api simply returns the elevation of given coordinates.
     </p>
 
     <p>
-        We used 
-        <a href="http://spray.io/documentation/1.2-M8/spray-client/">spray-client</a> 
-        to make Api calls asynchronously. <code>spray-client</code> api call definition is in
-        <a href="#code/src/main/scala/api/Api.scala" class="shortcut">Api.scala</a>
+        Just like in EchoHandler, <code>received</code> function is implemented to handle incoming data, which is
+        assumed to be coordinates now. What it does is to basically create a URL using the API url and incoming
+        coordinates, and then do a non-blocking HTTP request and Write'ing out the response of the API.
     </p>
 
     <p>
-        <code>sendReceive</code> produces a function (HttpRequest => Future[HttpResponse])
-        which you can make your HttpRequest with.
+        You may have already noticed that <a href="#code/src/main/scala/api/Api.scala" class="shortcut">Api</a> object
+        is used for making the HTTP request. Api object is a wrapper for
+        <a href="http://spray.io/documentation/1.2-M8/spray-client/" target="_blank">spray-client</a>, in which we
+        create an HttpRequest instance via <code>createHttpRequest</code> function and use that instance in a pipeline
+        to do the actual request in a reactive fashion.
+    </p>
 
-<pre><code>
-    val pipeline = sendReceive
-    pipeline {
-      HttpRequest(method = "HttpMethod",
-        uri = "ApiUri",
-        entity = HttpEntity("contentType", "data"))
-    }
-</code></pre>
+    <p>
+        Note that <code>sendAndReceive</code> produces an anonymous function with type
+        <code>(HttpRequest) => Future[HttpResponse]</code> which you can make your HTTP request with.
+    </p>
+
+    <h3>Running ApiHandler</h3>
+
+    <p>
+        Well, you are experienced now, don't you? Go ahead and <a href="#run" class="shortcut">run</a>
+        MainWithApiHandler and see it in action. Here is a sample session to guide you, just make sure you enter the
+        coordinates in latitude,longitude form:
+    </p>
+
+<pre>#Connect on default host and port
+telnet localhost 9999
+telnet> 28.976,41.014
+{
+   "results" : [
+      {
+         "elevation" : 752.8604736328125,
+         "location" : {
+            "lat" : 28.976,
+            "lng" : 41.014
+         },
+         "resolution" : 152.7032318115234
+      }
+   ],
+   "status" : "OK"
+}
+
+telnet> close
+Connection closed by foreign host.</pre>
+
+    <p>
+        Hey, there is one more handler before we wrap it up. Up to now, you see how to handle incoming requests
+        reactively, and also how to make API calls to remote services reactively. I know its already delicious, but how
+        about adding some reactive DB operations on top as icing? Just follow the lead...
+    </p>
+</div>
+
+<div>
+    <h2>Remember, Remember: DbHandler</h2>
+
+    <p>
+        <a href="#code/src/main/scala/handler/DbHandler.scala" class="shortcut">DbHandler</a>
+        writes incoming message to a MySQL database and returns all the data in database to sender.
+    </p>
+
+    <p><b>Note: In order to use DbHandler, you must have a MySQL Database and valid
+        database configuration for it. You see the details of configuration on the next page.
+    </b></p>
+
+    <p>
+        <a href="https://github.com/mauricio/postgresql-async">postgresql/mysql-async</a>
+        is used as MySql driver.
+    </p>
+
+    <h3>postgresql/mysql-async</h3>
+
+    <p>
+        <code>postgresql/mysql-async</code> is an async, Netty based database driver for MySQL and PostgreSQL written in
+        Scala.
+    </p>
+
+    <p>
+        Under <a href="#code/src/main/scala/db" class="shortcut">db</a> folder, there are two objects, Pool and DB.
+    </p>
+
+    <p>
+        <a href="#code/src/main/scala/db/Pool.scala" class="shortcut">Pool</a>
+        defines a connection pool for using database and keeps certain amount of connections ready to
+        use. If the pool has available connections, it will execute the given queries immediately, otherwise queries
+        will be pushed into a queue to be executed in future. Pool throws a <code>PoolExhaustedException</code> whenever
+        the queue is full (queue size is defined in
+        <a href="#code/src/main/resources/application.conf" class="shortcut">application.conf</a>)
+        Connections are returned back to pool after execution is done.
+    </p>
+
+    <p>
+        <a href="#code/src/main/scala/db/DB.scala" class="shortcut">DB</a>
+        is used to execute queries using Pool.
+    </p>
+
+<pre><code>def execute(query: String, values: Any*): Future[QueryResult] = {
+  if (values.size > 0)
+    pool.sendPreparedStatement(query, values)
+  else
+    pool.sendQuery(query)
+}</code></pre>
+
+    <p>
+        If there are values to be set, then the query is assumed to be a prepared statement and is executed with given
+        values bound. Otherwise, the query is executed on the Db as is, which means that there is no parameter binding,
+        nor prepared statement.
+    </p>
+
+    <p>
+        If you only need <code>Seq[RowData]</code>, you can use <code>fetch</code>:
+    </p>
+
+<pre><code>def fetch(query: String, values: Any*): Future[Option[Seq[RowData]]] =
+  execute(query, values: _*).map(_.rows)</code></pre>
+
+    <p>
+        <code>fetch</code> is used as part of
+        <a href="#code/src/main/scala/handler/DbHandler.scala" class="shortcut">DbHandler</a>, where the latest state
+        of the table is sent back through the connection.
+    </p>
+
+    <h3>Running DbHandler</h3>
+
+    <p>
+        This one is a bit different. First of all, it requires a MySQL server. Then, the SQLs from
+        <a href="#code/src/main/resources/setup.sql.conf" class="shortcut">setup.sql.conf</a> should be executed
+        in order to create the database and table that this handler uses. Finally,
+        <a href="#code/src/main/resources/application.conf" class="shortcut">application.conf</a> should be updated to
+        reflect your MySQL settings.
+    </p>
+
+    <p>
+        If you are all set, just <a href="#run" class="shortcut">run</a> MainWithDbHandler and see it in action.
+
+        Here is a sample session to guide you:
+    </p>
+
+<pre>#Connect on default host and port
+telnet localhost 9999
+telnet> testing
+values in db are:
+testing--Sun Sep 22 23:04:54 UTC 2013
+telnet> Hello World!
+values in db are:
+testing--Sun Sep 22 23:04:54 UTC 2013
+Hello World!--Sun Sep 22 23:05:03 UTC 2013
+telnet> close
+Connection closed by foreign host.</pre>
+
+    <p>
+        There you have it. All your messages are recorded and listed back to you with dates appended, and all of this
+        happens in a reactive way, without blocking any thread.
+    </p>
+
+    <p>
+        Rest of this tutorial will tell you a bit more about the configuration of this application, and list some next
+        steps for you to enjoy. Oh by the way, if you want to remove all traces of messages you sent, just execute the
+        SQL from <a href="#code/src/main/resources/destroy.sql.conf" class="shortcut">destroy.sql.conf</a>.
+    </p>
+
+</div>
+
+<div>
+    <h2>Configuration</h2>
+
+    <p> Configuration parameters of the application can be found in
+        <a href="#code/src/main/resources/application.conf" class="shortcut">application.conf</a>.
+        Considering the size of this application, having a single configuration file helps keeping it concise.
+        Configuration is organized hierarchically into 4 parts, namely tcp-async, app, api and db.
+    </p>
+
+    <p>
+        When the application starts, configuration is loaded into the
+        <a href="#code/src/main/scala/util/Conf.scala" class="shortcut">Conf</a> object.
+        Its always a good practice to load configuration parameters into the Conf object and read them through it.
+        Mainly because the values can be validated and replaced with defaults in case of an illegal parameter value,
+        and it also prevents application to read <code>.conf</code> file every time.
+
+        For more information, please see
+        <a href="https://github.com/typesafehub/config" target="_blank">typesafe config</a>.
+    </p>
 </div>
 
 <div>
     <h2>From Now On</h2>
 
     <p>
-        <a href="http://spray.io/documentation/1.2-M8/spray-client/">spray-client</a> 
-        have useful features like Authentication or marshalling/unmarshalling from and to your custom types.
-        
+        Thanks for following this tutorial. It was just a quick glance at the reactive technologies build around Scala.
+        Dive deeper through the links below for more excitement.
     </p>
 
     <p>
-        If you need a more basic Http server/client module, you can look at 
+        <a href="http://spray.io/documentation/1.2-M8/spray-client/">spray-client</a>
+        have useful features like Authentication or marshalling/unmarshalling from and to your custom types.
+    </p>
+
+    <p>
+        If you need a more basic Http server/client module, you can look at
         <a href="http://spray.io/documentation/1.2-M8/spray-can/">spray-can</a> which spray client also uses
         under the hood.
     </p>
 
     <p>
-        <a href="https://github.com/mauricio/postgresql-async">postgresql/mysql-async</a> has many more features than used in tutorial. Take a look at it.
+        <a href="https://github.com/mauricio/postgresql-async">postgresql/mysql-async</a> has many more features than
+        used in tutorial. Take a look at it.
     </p>
 
     <p>

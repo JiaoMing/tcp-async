@@ -5,8 +5,10 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar
 import com.github.mauricio.async.db.pool.ConnectionPool
 import org.mockito.Mockito._
-import org.mockito.{ArgumentMatcher, Matchers, Mockito}
-import com.github.mauricio.async.db.{ RowData, Connection, QueryResult }
+import org.mockito.ArgumentMatcher
+import org.mockito.Matchers._
+import org.mockito.Matchers.{eq => equalTo}
+import com.github.mauricio.async.db.{ RowData, Connection }
 import scala.concurrent.Future
 import scala.collection.mutable
 
@@ -28,12 +30,12 @@ class DBSpec extends WordSpec
 
     "executes \"sendPreparedStatement\" given query and parameters" in {
       spyDB.execute(query, inputParam1, inputParam2)
-      Mockito.verify(mockPool).sendPreparedStatement(Matchers.eq(query), Matchers.eq(Array(inputParam1, inputParam2)))
+      verify(mockPool).sendPreparedStatement(equalTo(query), equalTo(Array(inputParam1, inputParam2)))
     }
 
     "executes \"sendQuery\" given query and parameters" in {
       spyDB.execute(query)
-      Mockito.verify(mockPool).sendQuery(Matchers.eq(query))
+      verify(mockPool).sendQuery(equalTo(query))
     }
 
   }
@@ -45,7 +47,7 @@ class DBSpec extends WordSpec
     doReturn(mockPool).when(spyDB).pool
 
     "executes \"execute\" given query and parameters " in {
-      doReturn(mockRowDataSeqFuture).when(spyDB).execute(Matchers.anyString(), Matchers.any())
+      doReturn(mockRowDataSeqFuture).when(spyDB).execute(anyString(), any())
       spyDB.fetch(query, inputParam1, inputParam2)
 
       val executeInputMatcher = new ArgumentMatcher[mutable.WrappedArray[Any]] {
@@ -54,7 +56,7 @@ class DBSpec extends WordSpec
           array.size == 2 && array(0).equals(inputParam1) && array(1).equals(inputParam2)
         }
       }
-      Mockito.verify(spyDB).execute(Matchers.eq(query), Matchers.argThat(executeInputMatcher))
+      verify(spyDB).execute(equalTo(query), argThat(executeInputMatcher))
     }
 
   }

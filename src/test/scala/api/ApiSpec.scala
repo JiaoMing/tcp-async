@@ -8,8 +8,9 @@ import spray.http.HttpMethods.POST
 import spray.http.HttpRequest
 import spray.testkit.ScalatestRouteTest
 import spray.routing.HttpService
-import org.mockito.Mockito
-import org.mockito.Matchers
+import org.mockito.Mockito._
+import org.mockito.Matchers._
+import org.mockito.Matchers.{eq => equalTo}
 import org.scalatest.mock.MockitoSugar
 
 class ApiSpec extends WordSpec
@@ -67,42 +68,42 @@ class ApiSpec extends WordSpec
     val url = "http://www.example.com"
 
     "createHttpRequest with given url using GET method and empty data by default" in {
-      val api = Mockito.spy(new Api)
+      val api = spy(new Api)
 
       api.httpRequest(url)
 
-      Mockito.verify(api).createHttpRequest(Matchers.eq(url), Matchers.eq(GET), Matchers.eq(""))
+      verify(api).createHttpRequest(equalTo(url), equalTo(GET), equalTo(""))
     }
 
     "createHttpRequest with given url and method using empty data by default" in {
-      val api = Mockito.spy(new Api)
+      val api = spy(new Api)
 
       api.httpRequest(url, POST)
 
-      Mockito.verify(api).createHttpRequest(Matchers.eq(url), Matchers.eq(POST), Matchers.eq(""))
+      verify(api).createHttpRequest(equalTo(url), equalTo(POST), equalTo(""))
     }
 
     "createHttpRequest with given url, method and data" in {
-      val api = Mockito.spy(new Api)
+      val api = spy(new Api)
       val data = "somedata"
 
       api.httpRequest(url, POST, data)
 
-      Mockito.verify(api).createHttpRequest(Matchers.eq(url), Matchers.eq(POST), Matchers.eq(data))
+      verify(api).createHttpRequest(equalTo(url), equalTo(POST), equalTo(data))
     }
 
     "call sendAndReceive using HttpResponse from createHttpRequest" in {
-      val api = Mockito.spy(new Api)
+      val api = spy(new Api)
 
       val httpRequest = mock[HttpRequest]
       val sendAndReceive = mock[spray.client.pipelining.SendReceive]
 
-      Mockito.doReturn(httpRequest).when(api).createHttpRequest(Matchers.any(), Matchers.any(), Matchers.any())
-      Mockito.doReturn(sendAndReceive).when(api).sendAndReceive
+      doReturn(httpRequest).when(api).createHttpRequest(any(), any(), any())
+      doReturn(sendAndReceive).when(api).sendAndReceive
 
       api.httpRequest("/test")
 
-      Mockito.verify(sendAndReceive).apply(httpRequest)
+      verify(sendAndReceive).apply(httpRequest)
     }
   }
 }

@@ -25,6 +25,9 @@ abstract class Handler(val connection: ActorRef) extends Actor {
     case PeerClosed =>
       peerClosed()
       stop()
+    case ErrorClosed =>
+      errorClosed()
+      stop()
     case Closed =>
       closed()
       stop()
@@ -40,6 +43,10 @@ abstract class Handler(val connection: ActorRef) extends Actor {
 
   def peerClosed() {
     println("PeerClosed")
+  }
+
+  def errorClosed() {
+    println("ErrorClosed")
   }
 
   def closed() {
