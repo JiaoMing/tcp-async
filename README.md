@@ -2,12 +2,12 @@
 [![Coverage Status](https://coveralls.io/repos/vngrs/tcp-async/badge.png?branch=master)](https://coveralls.io/r/vngrs/tcp-async?branch=master)
 
 
-tcp-handler
+tcp-async
 ===========
 
 What
 -----
-<i>tcp-handler</i> is an typesafe activator template which handles tcp requests.
+<i>tcp-async</i> is an typesafe activator template which handles tcp requests reactively.
 
 
 Why
