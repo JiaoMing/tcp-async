@@ -16,7 +16,7 @@ When you reached to limits of your synchronous application, you will start to lo
 an alternative way to expand your request handling capacity. That's where reactive programming will shine.
 
 <a href="http://en.wikipedia.org/wiki/C10k_problem">Handling 10K Requests</a> is not a trivial goal.
-And reaching to that numbers is may cost a lot with standart programming architectures.
+And reaching to those numbers may cost a lot with standart programming architectures.
 
 <i>tcp-async</i> shows how to implement a simple and functional reactive application in <a href="http://www.scala-lang.org/">scala</a>.
 
