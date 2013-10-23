@@ -15,7 +15,7 @@ class TcpServer(handlerProps: HandlerProps) extends Server {
 
   implicit val system = context.system
 
-  IO(Tcp) ! Tcp.Bind(self, new InetSocketAddress(Conf.appHostName, Conf.appPort))
+  IO(Tcp) ! Tcp.Bind(self, new InetSocketAddress(ConfExtension(system).appHostName, ConfExtension(system).appPort))
 
   override def receive = {
     case Tcp.CommandFailed(_: Tcp.Bind) => context stop self

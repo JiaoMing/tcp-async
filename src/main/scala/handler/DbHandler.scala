@@ -14,6 +14,8 @@ object DbHandlerProps extends HandlerProps {
 
 class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
 
+  override lazy val system = context.system
+
   /**
    * Writes incoming message to database and returns all data in db to user
    * @return

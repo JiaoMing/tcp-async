@@ -11,13 +11,16 @@ import org.mockito.Matchers.{eq => equalTo}
 import com.github.mauricio.async.db.{ RowData, Connection }
 import scala.concurrent.Future
 import scala.collection.mutable
+import akka.actor.ActorSystem
 
 class DBSpec extends WordSpec
   with MustMatchers
   with MockitoSugar {
 
   val mockPool = mock[ConnectionPool[Connection]]
-  class Database extends DB
+  class Database extends DB {
+    override lazy val system = ActorSystem()
+  }
 
   val query = "DEMO (?,?)"
   val inputParam1 = "input1"

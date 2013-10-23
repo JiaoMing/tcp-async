@@ -4,7 +4,7 @@ import akka.util.ByteString
 import scala.concurrent.ExecutionContext.Implicits.global
 import api.Api
 import spray.http.HttpMethods._
-import util.Conf
+import util.ConfExtension
 import akka.io.Tcp.Write
 import akka.actor.{ Props, ActorRef }
 
@@ -20,7 +20,7 @@ class ApiHandler(connection: ActorRef) extends Handler(connection) {
    * Makes an api request to Google Elevation API with given location data and returns response to user.
    */
   def received(data: String) = {
-    val uri = Conf.apiUrl + data
+    val uri = ConfExtension(context.system).apiUrl + data
     Api.httpRequest(method = GET, uri = uri) map {
       response =>
         respond(response.entity.asString)

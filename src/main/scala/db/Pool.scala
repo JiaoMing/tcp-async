@@ -4,16 +4,17 @@ import com.github.mauricio.async.db.Configuration
 import com.github.mauricio.async.db.mysql.pool.MySQLConnectionFactory
 import com.github.mauricio.async.db.pool.ConnectionPool
 import com.github.mauricio.async.db.pool.PoolConfiguration
-import util.Conf
+import util.ConfExtension
+import akka.actor.ActorSystem
 
-object Pool {
+class Pool(system: ActorSystem) {
+  val conf = ConfExtension(system)
 
-  val configuration = new Configuration(username = Conf.dbUsername,
-    port = Conf.dbPort,
-    password = Some(Conf.dbPassword),
-    database = Some(Conf.dbName))
+  val configuration = new Configuration(username = conf.dbUsername,
+    port = conf.dbPort,
+    password = Some(conf.dbPassword),
+    database = Some(conf.dbName))
 
   val factory = new MySQLConnectionFactory(configuration)
-  val pool = new ConnectionPool(factory, new PoolConfiguration(Conf.dbPoolMaxObjects, Conf.dbPoolMaxIdle, Conf.dbPoolMaxQueueSize))
-
+  val pool = new ConnectionPool(factory, new PoolConfiguration(conf.dbPoolMaxObjects, conf.dbPoolMaxIdle, conf.dbPoolMaxQueueSize))
 }

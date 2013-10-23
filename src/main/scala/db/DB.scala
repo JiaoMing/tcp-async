@@ -3,9 +3,12 @@ package db
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import com.github.mauricio.async.db.{ RowData, QueryResult }
+import akka.actor.ActorSystem
 
 trait DB {
-  val pool = Pool.pool
+  lazy val system : ActorSystem = ActorSystem()
+
+  val pool = new Pool(system).pool
 
   /**
    * Creates a prepared statement with the given query

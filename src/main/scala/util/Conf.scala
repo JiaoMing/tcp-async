@@ -1,9 +1,9 @@
 package util
 
 import com.typesafe.config.ConfigFactory
+import akka.actor.{ExtendedActorSystem, ExtensionIdProvider, ExtensionId, Extension}
 
-object Conf {
-
+class ConfExtensionImpl extends Extension {
   val config = ConfigFactory.load
   config.checkValid(ConfigFactory.defaultReference)
 
@@ -20,4 +20,10 @@ object Conf {
   val dbPoolMaxObjects = config.getInt("tcp-async.db.pool.maxObjects")
   val dbPoolMaxIdle = config.getInt("tcp-async.db.pool.maxIdle")
   val dbPoolMaxQueueSize = config.getInt("tcp-async.db.pool.maxQueueSize")
+}
+
+object ConfExtension extends ExtensionId[ConfExtensionImpl] with ExtensionIdProvider {
+  def lookup() = ConfExtension
+
+  def createExtension(system: ExtendedActorSystem) = new ConfExtensionImpl
 }
