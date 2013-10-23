@@ -14,9 +14,10 @@ object ApiHandlerProps extends HandlerProps {
 
 class ApiHandler(connection: ActorRef) extends Handler(connection) {
 
+  private val newLine = ByteString("\n")
+
   /**
    * Makes an api request to Google Elevation API with given location data and returns response to user.
-   * @return
    */
   def received(data: String) = {
     val uri = Conf.apiUrl + data
@@ -27,10 +28,10 @@ class ApiHandler(connection: ActorRef) extends Handler(connection) {
   }
 
   /**
-   * Send given data to user
+   * Sends given data over connection to client, appending a newline
    * @param response
    */
   def respond(response: String) {
-    connection ! Write(ByteString(response + "\n"))
+    connection ! Write(ByteString(response) ++ newLine)
   }
 }

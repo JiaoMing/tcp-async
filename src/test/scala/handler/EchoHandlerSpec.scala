@@ -7,6 +7,7 @@ import akka.testkit.{ ImplicitSender, TestKit }
 import akka.io.Tcp._
 import akka.util.ByteString
 import akka.io.Tcp.Received
+import scala.concurrent.duration._
 
 class EchoHandlerSpec(_system: ActorSystem)
   extends TestKit(_system)
@@ -36,6 +37,7 @@ class EchoHandlerSpec(_system: ActorSystem)
       val data = ByteString("close")
       handler ! Received(data)
       expectMsg(Close)
+      expectNoMsg(1.second)
     }
 
     "close itself if ErrorClosed is received" in {

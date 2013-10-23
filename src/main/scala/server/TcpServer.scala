@@ -13,7 +13,7 @@ object TcpServer {
 
 class TcpServer(handlerProps: HandlerProps) extends Server {
 
-  import context.system
+  implicit val system = context.system
 
   IO(Tcp) ! Tcp.Bind(self, new InetSocketAddress(Conf.appHostName, Conf.appPort))
 

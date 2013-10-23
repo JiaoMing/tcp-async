@@ -1,6 +1,6 @@
 package handler
 
-import akka.actor.{ Props, ActorRef, Actor }
+import akka.actor.{ActorLogging, Props, ActorRef, Actor}
 import akka.io.Tcp._
 import akka.io.Tcp.Received
 
@@ -8,7 +8,7 @@ trait HandlerProps {
   def props(connection: ActorRef): Props
 }
 
-abstract class Handler(val connection: ActorRef) extends Actor {
+abstract class Handler(val connection: ActorRef) extends Actor with ActorLogging {
 
   val abort = "(?i)abort".r
   val confirmedClose = "(?i)confirmedclose".r
@@ -42,27 +42,27 @@ abstract class Handler(val connection: ActorRef) extends Actor {
   def received(str: String): Unit
 
   def peerClosed() {
-    println("PeerClosed")
+    log.info("PeerClosed")
   }
 
   def errorClosed() {
-    println("ErrorClosed")
+    log.info("ErrorClosed")
   }
 
   def closed() {
-    println("Closed")
+    log.info("Closed")
   }
 
   def confirmedClosed() {
-    println("ConfirmedClosed")
+    log.info("ConfirmedClosed")
   }
 
   def aborted() {
-    println("Aborted")
+    log.info("Aborted")
   }
 
   def stop() {
-    println("Stopping")
+    log.info("Stopping")
     context stop self
   }
 }

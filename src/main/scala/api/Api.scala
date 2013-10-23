@@ -3,9 +3,8 @@ package api
 import spray.client.pipelining._
 import spray.http._
 import akka.actor.ActorSystem
-import spray.http.ContentType.apply
 import spray.http.Uri.apply
-import HttpMethods._
+import spray.http.HttpMethods._
 import spray.http.HttpRequest
 import spray.http.HttpMethod
 

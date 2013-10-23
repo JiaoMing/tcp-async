@@ -29,7 +29,7 @@ class TcpServerSpec(_system: ActorSystem)
       val server = system.actorOf(TcpServer.props(EchoHandlerProps), "ServerActor")
       server ! Connected(new InetSocketAddress(5555),
         new InetSocketAddress(9000))
-      expectMsgPF() { case _: Register => }
+      expectMsgType[Register]
     }
 
   }
