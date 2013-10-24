@@ -6,13 +6,14 @@ import com.github.mauricio.async.db.RowData
 import java.util.Date
 import akka.io.Tcp.Write
 import akka.actor.{ Props, ActorRef }
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object DbHandlerProps extends HandlerProps {
   def props(connection: ActorRef) = Props(classOf[DbHandler], connection)
 }
 
 class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
+
+  import context.dispatcher
 
   def system = context.system
 
