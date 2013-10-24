@@ -6,9 +6,9 @@ import com.github.mauricio.async.db.{ RowData, QueryResult }
 import akka.actor.ActorSystem
 
 trait DB {
-  lazy val system : ActorSystem = ActorSystem()
+  def system : ActorSystem
 
-  val pool = new Pool(system).pool
+  lazy val pool = new Pool(system).pool
 
   /**
    * Creates a prepared statement with the given query

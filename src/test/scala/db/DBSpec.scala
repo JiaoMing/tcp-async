@@ -19,7 +19,7 @@ class DBSpec extends WordSpec
 
   val mockPool = mock[ConnectionPool[Connection]]
   class Database extends DB {
-    override lazy val system = ActorSystem()
+    def system = mock[ActorSystem]
   }
 
   val query = "DEMO (?,?)"
