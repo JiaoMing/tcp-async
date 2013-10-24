@@ -1,10 +1,9 @@
 package util
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import akka.actor.{ExtendedActorSystem, ExtensionIdProvider, ExtensionId, Extension}
 
-class ConfExtensionImpl extends Extension {
-  val config = ConfigFactory.load
+class ConfExtensionImpl(config: Config) extends Extension {
   config.checkValid(ConfigFactory.defaultReference)
 
   val appHostName = config.getString("tcp-async.app.hostname")
@@ -25,5 +24,5 @@ class ConfExtensionImpl extends Extension {
 object ConfExtension extends ExtensionId[ConfExtensionImpl] with ExtensionIdProvider {
   def lookup() = ConfExtension
 
-  def createExtension(system: ExtendedActorSystem) = new ConfExtensionImpl
+  def createExtension(system: ExtendedActorSystem) = new ConfExtensionImpl(system.settings.config)
 }
