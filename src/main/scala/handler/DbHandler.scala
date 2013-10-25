@@ -13,9 +13,9 @@ object DbHandlerProps extends HandlerProps {
 
 class DbHandler(connection: ActorRef) extends Handler(connection) with DB {
 
-  import context.dispatcher
-
   def system = context.system
+
+  override implicit def dispatcher = context.dispatcher
 
   /**
    * Writes incoming message to database and returns all data in db to user

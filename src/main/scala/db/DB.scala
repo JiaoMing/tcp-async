@@ -1,12 +1,12 @@
 package db
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import com.github.mauricio.async.db.{ RowData, QueryResult }
 import akka.actor.ActorSystem
 
 trait DB {
   def system : ActorSystem
+  implicit def dispatcher : ExecutionContext
 
   lazy val pool = new Pool(system).pool
 

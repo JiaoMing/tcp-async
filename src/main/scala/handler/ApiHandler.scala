@@ -1,7 +1,6 @@
 package handler
 
 import akka.util.ByteString
-import scala.concurrent.ExecutionContext.Implicits.global
 import api.Api
 import spray.http.HttpMethods._
 import util.ConfExtension
@@ -17,6 +16,8 @@ object ApiHandler {
 }
 
 class ApiHandler(connection: ActorRef) extends Handler(connection) {
+
+  import context.dispatcher
 
   /**
    * Makes an api request to Google Elevation API with given location data and returns response to user.

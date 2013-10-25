@@ -9,7 +9,7 @@ import org.mockito.ArgumentMatcher
 import org.mockito.Matchers._
 import org.mockito.Matchers.{eq => equalTo}
 import com.github.mauricio.async.db.{ RowData, Connection }
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.mutable
 import akka.actor.ActorSystem
 
@@ -20,6 +20,7 @@ class DBSpec extends WordSpec
   val mockPool = mock[ConnectionPool[Connection]]
   class Database extends DB {
     def system = mock[ActorSystem]
+    def dispatcher = mock[ExecutionContext]
   }
 
   val query = "DEMO (?,?)"
